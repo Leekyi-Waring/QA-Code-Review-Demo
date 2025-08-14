@@ -3,84 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kusto Overlord - SIMPLE VERSION THAT WORKS</title>
+    <title>MXDR365 - Enterprise KQL Query Grader</title>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0078d4, #005a9e);
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
             min-height: 100vh;
+            color: #323130;
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        }
-        
+
         .header {
             background: linear-gradient(90deg, #0078d4, #106ebe);
             color: white;
-            padding: 30px;
+            padding: 20px 0;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        
-        .header h1 {
-            margin: 0 0 10px 0;
-            font-size: 2.5rem;
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
-        
-        .content {
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-text h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .brand-text .tagline {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: -5px;
+            font-weight: 300;
+        }
+
+        .header-subtitle {
+            font-size: 1.1rem;
+            margin-top: 10px;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr 450px;
             gap: 30px;
-            padding: 30px;
         }
-        
-        .left-panel {
+
+        .main-panel {
             background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
-        
-        .right-panel {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            max-height: 80vh;
+
+        .results-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            max-height: calc(100vh - 200px);
             overflow-y: auto;
         }
-        
+
         .section-title {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: #323130;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        #queryInput {
+
+        .query-editor {
             width: 100%;
             height: 400px;
-            padding: 20px;
-            border: 2px solid #edebe9;
+            background: #f8f9fa;
+            border: 2px solid #e1dfdd;
             border-radius: 8px;
-            font-family: 'Consolas', monospace;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 14px;
-            background: #f8f8f8;
+            line-height: 1.5;
             resize: vertical;
             outline: none;
+            transition: border-color 0.3s ease;
         }
-        
-        #queryInput:focus {
+
+        .query-editor:focus {
             border-color: #0078d4;
+            box-shadow: 0 0 0 3px rgba(0,120,212,0.1);
         }
-        
-        #gradeBtn {
+
+        .grade-button {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(45deg, #0078d4, #106ebe);
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #0078d4, #106ebe);
             color: white;
             border: none;
             border-radius: 8px;
@@ -88,652 +128,1506 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 20px;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0,120,212,0.3);
         }
-        
-        #gradeBtn:hover {
+
+        .grade-button:hover {
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,120,212,0.4);
         }
-        
+
+        .grade-button:active {
+            transform: translateY(0);
+        }
+
         .score-display {
             text-align: center;
             padding: 30px;
-            background: white;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
             border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            border: 1px solid #e1dfdd;
         }
-        
+
         .score-number {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        
-        .score-excellent { color: #107c10; }
-        .score-good { color: #0078d4; }
-        .score-poor { color: #ff8c00; }
-        .score-fail { color: #d13438; }
-        
-        .grade-badge {
+
+        .score-grade {
             display: inline-block;
-            padding: 8px 20px;
-            border-radius: 20px;
+            padding: 10px 24px;
+            border-radius: 25px;
             color: white;
             font-weight: 600;
-            margin-top: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
         }
-        
-        .grade-excellent { background: #107c10; }
-        .grade-good { background: #0078d4; }
-        .grade-poor { background: #ff8c00; }
-        .grade-fail { background: #d13438; }
-        
-        .issue {
-            background: white;
-            padding: 20px;
+
+        .grade-excellent { background: linear-gradient(135deg, #107c10, #0e6f0e); }
+        .grade-good { background: linear-gradient(135deg, #0078d4, #106ebe); }
+        .grade-fair { background: linear-gradient(135deg, #ff8c00, #e67e00); }
+        .grade-poor { background: linear-gradient(135deg, #d13438, #b22a2f); }
+        .grade-fail { background: linear-gradient(135deg, #a4262c, #8b1f24); }
+
+        .issue-card {
+            background: #f8f9fa;
             border-radius: 8px;
+            padding: 20px;
             margin-bottom: 15px;
-            border-left: 4px solid;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #0078d4;
+            transition: transform 0.2s ease;
         }
-        
+
+        .issue-card:hover {
+            transform: translateX(5px);
+        }
+
         .issue-critical { border-left-color: #d13438; }
         .issue-major { border-left-color: #ff8c00; }
         .issue-minor { border-left-color: #0078d4; }
-        
+
         .issue-title {
             font-weight: 600;
+            font-size: 1rem;
             margin-bottom: 10px;
             color: #323130;
         }
-        
-        .issue-desc {
+
+        .issue-description {
             color: #605e5c;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             line-height: 1.5;
         }
-        
+
         .issue-fix {
             background: rgba(0,120,212,0.1);
-            padding: 12px;
+            border: 1px solid rgba(0,120,212,0.2);
             border-radius: 6px;
-            color: #323130;
+            padding: 12px;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
-        
-        .welcome {
+
+        .welcome-state {
             text-align: center;
-            padding: 40px;
+            padding: 50px 20px;
             color: #605e5c;
         }
-        
+
+        .welcome-state h3 {
+            color: #323130;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        /* Chat Styles */
         .chat-toggle {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            width: 60px;
-            height: 60px;
-            background: #0078d4;
-            color: white;
-            border: none;
+            width: 75px;
+            height: 75px;
+            background: linear-gradient(135deg, #ffffff, #f0f8ff);
+            border: 3px solid #0078d4;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0,120,212,0.3);
+            box-shadow: 0 8px 32px rgba(0,120,212,0.4);
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
         }
-        
+
+        .chat-toggle:hover {
+            transform: scale(1.15);
+            box-shadow: 0 12px 40px rgba(0,120,212,0.6);
+            border-color: #106ebe;
+        }
+
+        .chat-toggle svg {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
         .chat-panel {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            width: 400px;
-            height: 500px;
+            width: 450px;
+            height: 650px;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.2);
             display: none;
             flex-direction: column;
             z-index: 1001;
+            overflow: hidden;
         }
-        
+
         .chat-header {
-            background: #0078d4;
+            background: linear-gradient(135deg, #0078d4, #106ebe);
             color: white;
-            padding: 15px 20px;
-            border-radius: 12px 12px 0 0;
+            padding: 20px;
             font-weight: 600;
+            font-size: 1.1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .chat-close {
-            background: none;
+            background: rgba(255,255,255,0.2);
             border: none;
             color: white;
             cursor: pointer;
             font-size: 1.5rem;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .chat-body {
+
+        .chat-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .quick-questions {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1dfdd;
+        }
+
+        .questions-toggle {
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #0078d4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e1dfdd;
+        }
+
+        .questions-toggle:hover {
+            background: #f3f2f1;
+        }
+
+        .questions-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .questions-list.expanded {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .question-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f2f1;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            transition: background-color 0.2s ease;
+        }
+
+        .question-item:hover {
+            background: #f3f2f1;
+        }
+
+        .question-item:last-child {
+            border-bottom: none;
+        }
+
+        .chat-messages {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
             background: #f8f9fa;
         }
-        
+
         .chat-input-area {
-            display: flex;
-            padding: 15px;
-            border-top: 1px solid #edebe9;
+            padding: 20px;
+            border-top: 1px solid #e1dfdd;
             background: white;
+            display: flex;
+            gap: 12px;
         }
-        
+
         .chat-input {
             flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #edebe9;
-            border-radius: 20px;
-            margin-right: 10px;
+            padding: 12px 16px;
+            border: 1px solid #e1dfdd;
+            border-radius: 25px;
             outline: none;
+            font-size: 0.9rem;
         }
-        
+
+        .chat-input:focus {
+            border-color: #0078d4;
+            box-shadow: 0 0 0 2px rgba(0,120,212,0.1);
+        }
+
         .chat-send {
-            padding: 10px 20px;
+            padding: 12px 20px;
             background: #0078d4;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
             font-weight: 600;
+            transition: background-color 0.2s ease;
         }
-        
+
+        .chat-send:hover {
+            background: #106ebe;
+        }
+
         .message {
             margin-bottom: 15px;
-            padding: 12px 15px;
+            padding: 12px 16px;
             border-radius: 12px;
             line-height: 1.5;
-            max-width: 90%;
+            max-width: 85%;
+            font-size: 0.9rem;
         }
-        
+
         .message-user {
             background: #0078d4;
             color: white;
             margin-left: auto;
+            border-bottom-right-radius: 4px;
         }
-        
+
         .message-ai {
             background: white;
             color: #323130;
-            border: 1px solid #edebe9;
+            border: 1px solid #e1dfdd;
+            border-bottom-left-radius: 4px;
         }
-        
-        @media (max-width: 1000px) {
-            .content {
+
+        @media (max-width: 1200px) {
+            .container {
                 grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .chat-panel {
+                width: 380px;
+                height: 580px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .brand-text h1 {
+                font-size: 2.2rem;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .chat-panel {
+                width: 320px;
+                height: 500px;
+                bottom: 20px;
+                right: 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔥 Kusto Overlord</h1>
-            <p>SIMPLE VERSION THAT ACTUALLY WORKS</p>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <svg width="60" height="60" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+                            <stop offset="100%" style="stop-color:#e8f4ff;stop-opacity:0.95" />
+                        </linearGradient>
+                        <linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+                            <stop offset="100%" style="stop-color:#f0f0f0;stop-opacity:0.9" />
+                        </linearGradient>
+                    </defs>
+                    
+                    <path d="M250 50 L150 80 L150 200 Q150 350 250 420 Q350 350 350 200 L350 80 Z" fill="url(#shieldGrad)" stroke="rgba(255,255,255,0.8)" stroke-width="3"/>
+                    <rect x="240" y="30" width="20" height="40" fill="rgba(255,255,255,0.95)"/>
+                    <rect x="230" y="40" width="40" height="20" fill="rgba(255,255,255,0.95)"/>
+                    <ellipse cx="250" cy="180" rx="40" ry="35" fill="rgba(255,255,255,0.85)"/>
+                    <path d="M220 170 Q210 165 200 175 Q205 185 220 180" fill="rgba(255,255,255,0.85)"/>
+                    <circle cx="235" cy="170" r="3" fill="rgba(0,120,212,0.8)"/>
+                    <path d="M290 150 Q320 140 350 160 Q380 180 400 220 Q390 200 370 185 Q340 170 310 175 Q295 165 290 150" fill="url(#wingGrad)"/>
+                    <path d="M320 170 Q340 160 365 175 Q380 190 390 210 Q385 195 370 185 Q350 175 330 180 Q325 175 320 170" fill="url(#wingGrad)" opacity="0.7"/>
+                    <rect x="248" y="350" width="4" height="60" fill="rgba(255,255,255,0.85)"/>
+                    <path d="M235 340 L265 340 L260 350 L240 350 Z" fill="rgba(255,255,255,0.95)"/>
+                </svg>
+                <div class="brand-text">
+                    <h1>MXDR365</h1>
+                    <div class="tagline">we have the watch</div>
+                </div>
+            </div>
         </div>
+        <div class="header-subtitle">Enterprise KQL Query Grader with AI Guardian</div>
+    </div>
 
-        <div class="content">
-            <div class="left-panel">
-                <div class="section-title">📝 KQL Query Input</div>
-                
-                <textarea id="queryInput" placeholder="// Enter your KQL query here
+    <div class="container">
+        <div class="main-panel">
+            <div class="section-title">
+                📝 KQL Query Analysis
+            </div>
+            
+            <textarea 
+                id="queryEditor" 
+                class="query-editor" 
+                placeholder="// Enter your KQL query here for professional analysis
 
-// TEST FAKE QUERY (should get 0/1000):
+// TEST FAKE QUERY (should receive 0/1000 points):
 HasOffHoursActivity,HasWeekendActivity,OffHoursConnections
 
-// TEST VALID QUERY (should score well):
+// TEST VALID QUERY (should receive high score):
 SecurityEvent
 | where TimeGenerated > ago(7d)
 | where EventID == 4624
-| project Computer, Account"></textarea>
+| project Computer, Account, TimeGenerated
+| summarize LoginCount = count() by Account
+| order by LoginCount desc"></textarea>
 
-                <button id="gradeBtn">🎯 Grade Query</button>
+            <button id="analyzeBtn" class="grade-button">
+                🎯 Analyze Query with MXDR365 AI
+            </button>
+        </div>
+
+        <div class="results-panel">
+            <div class="section-title">
+                📊 Analysis Results
             </div>
-
-            <div class="right-panel">
-                <div class="section-title">📊 Analysis Results</div>
-                
-                <div id="results">
-                    <div class="welcome">
-                        <h3>🤖 Ready to Grade</h3>
-                        <p>Enter a KQL query and click "Grade Query" for analysis.</p>
-                        <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px;">
-                            <strong>This version:</strong><br>
-                            ✅ Multiple queries (no refresh needed)<br>
-                            ✅ Working AI chat<br>
-                            ✅ Strict fake table detection<br>
-                            ✅ Simple and reliable
-                        </div>
+            
+            <div id="analysisResults">
+                <div class="welcome-state">
+                    <h3>🛡️ MXDR365 Analysis Engine Ready</h3>
+                    <p>Enter your KQL query and click "Analyze Query" to receive comprehensive professional analysis.</p>
+                    
+                    <div class="feature-list">
+                        <strong>🔥 Enterprise Features:</strong><br><br>
+                        ✅ <strong>Strict Validation:</strong> Catches fake tables and invalid syntax instantly<br>
+                        ✅ <strong>Performance Analysis:</strong> Identifies optimization opportunities<br>
+                        ✅ <strong>Security Assessment:</strong> Evaluates data exposure risks<br>
+                        ✅ <strong>AI Guardian:</strong> Expert KQL guidance and quick answers<br>
+                        ✅ <strong>Multiple Analyses:</strong> No refresh needed between queries<br>
+                        ✅ <strong>Professional Scoring:</strong> Enterprise-grade quality metrics<br><br>
+                        
+                        💡 <strong>Click the eagle shield for instant KQL expertise!</strong>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Chat -->
-    <button class="chat-toggle" onclick="toggleChat()">🤖</button>
-    
+    <!-- AI Guardian Chat -->
+    <div class="chat-toggle" id="chatToggle">
+        <svg width="50" height="50" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="toggleShield" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#1e4d6b;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#0078d4;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="toggleWing" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#c41e3a;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#8b1538;stop-opacity:1" />
+                </linearGradient>
+                <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+                </filter>
+            </defs>
+            
+            <!-- Shield with better contrast -->
+            <path d="M250 50 L150 80 L150 200 Q150 350 250 420 Q350 350 350 200 L350 80 Z" 
+                  fill="url(#toggleShield)" 
+                  stroke="#1e4d6b" 
+                  stroke-width="4" 
+                  filter="url(#shadow)"/>
+            
+            <!-- Cross on top - more visible -->
+            <rect x="238" y="28" width="24" height="44" fill="#c41e3a" stroke="#8b1538" stroke-width="1"/>
+            <rect x="228" y="38" width="44" height="24" fill="#c41e3a" stroke="#8b1538" stroke-width="1"/>
+            
+            <!-- Eagle head - enhanced -->
+            <ellipse cx="250" cy="180" rx="42" ry="37" fill="#1e4d6b" stroke="#0f2a3d" stroke-width="2"/>
+            <path d="M218 170 Q208 165 198 175 Q203 185 218 180" fill="#1e4d6b" stroke="#0f2a3d" stroke-width="1"/>
+            <circle cx="235" cy="170" r="4" fill="white" stroke="#1e4d6b" stroke-width="1"/>
+            
+            <!-- Wings - more prominent -->
+            <path d="M290 150 Q320 140 350 160 Q380 180 400 220 Q390 200 370 185 Q340 170 310 175 Q295 165 290 150" 
+                  fill="url(#toggleWing)" 
+                  stroke="#6b1129" 
+                  stroke-width="2"/>
+            <path d="M320 170 Q340 160 365 175 Q380 190 390 210 Q385 195 370 185 Q350 175 330 180 Q325 175 320 170" 
+                  fill="url(#toggleWing)" 
+                  opacity="0.8" 
+                  stroke="#6b1129" 
+                  stroke-width="1"/>
+            <path d="M335 185 Q350 180 370 190 Q380 200 385 215 Q380 205 370 195 Q355 185 340 190 Q337 187 335 185" 
+                  fill="url(#toggleWing)" 
+                  opacity="0.6"/>
+            
+            <!-- Sword - more visible -->
+            <rect x="247" y="348" width="6" height="64" fill="#8B4513" stroke="#654321" stroke-width="1"/>
+            <path d="M233 338 L267 338 L262 352 L238 352 Z" fill="#c41e3a" stroke="#8b1538" stroke-width="1"/>
+        </svg>
+    </div>
+
     <div class="chat-panel" id="chatPanel">
         <div class="chat-header">
-            🤖 KQL AI Assistant
-            <button class="chat-close" onclick="toggleChat()">×</button>
+            🛡️ MXDR365 KQL Guardian
+            <button class="chat-close" id="chatClose">×</button>
         </div>
-        <div class="chat-body" id="chatBody">
-            <div class="message message-ai">
-                <strong>🚀 KQL Expert Ready!</strong><br><br>
-                I'm working properly now! Ask me about:
-                <br><br>
-                • Valid vs fake tables<br>
-                • Query optimization<br>
-                • KQL syntax help<br>
-                • Performance tips<br><br>
-                💡 Try: "What makes a table fake?" or "Help with my query"
+        
+        <div class="quick-questions" id="quickQuestions">
+            <div class="questions-toggle" id="questionsToggle">
+                💡 Quick Expert Questions
+                <span id="toggleIcon">▼</span>
+            </div>
+            <div class="questions-list" id="questionsList">
+                <!-- Table Validation & Basics -->
+                <div class="question-item" data-question="What Microsoft security tables are valid and which are fake?">
+                    🛡️ What Microsoft security tables are valid and which are fake?
+                </div>
+                <div class="question-item" data-question="Why does my query automatically fail with 0 points?">
+                    🚨 Why does my query automatically fail with 0 points?
+                </div>
+                <div class="question-item" data-question="What makes a table name fake versus legitimate?">
+                    ❌ What makes a table name fake versus legitimate?
+                </div>
+                <div class="question-item" data-question="How do I identify real Microsoft 365 Defender tables?">
+                    🔍 How do I identify real Microsoft 365 Defender tables?
+                </div>
+                <div class="question-item" data-question="What are the most important security tables for SOC analysts?">
+                    🎯 What are the most important security tables for SOC analysts?
+                </div>
+                
+                <!-- Performance Optimization -->
+                <div class="question-item" data-question="Why do I need TimeGenerated filters in my KQL queries?">
+                    ⏰ Why do I need TimeGenerated filters in my KQL queries?
+                </div>
+                <div class="question-item" data-question="What's wrong with using project * in KQL queries?">
+                    ⚡ What's wrong with using project * in KQL queries?
+                </div>
+                <div class="question-item" data-question="How do I optimize KQL query performance for large datasets?">
+                    🚀 How do I optimize KQL query performance for large datasets?
+                </div>
+                <div class="question-item" data-question="What are the biggest performance killers in KQL queries?">
+                    💥 What are the biggest performance killers in KQL queries?
+                </div>
+                <div class="question-item" data-question="How can I reduce KQL query costs and execution time?">
+                    💰 How can I reduce KQL query costs and execution time?
+                </div>
+                <div class="question-item" data-question="What's the best way to filter SecurityEvent table efficiently?">
+                    🔧 What's the best way to filter SecurityEvent table efficiently?
+                </div>
+                <div class="question-item" data-question="How do I optimize queries that scan millions of records?">
+                    📊 How do I optimize queries that scan millions of records?
+                </div>
+                <div class="question-item" data-question="Why should I avoid wildcard searches in production KQL?">
+                    🚫 Why should I avoid wildcard searches in production KQL?
+                </div>
+                
+                <!-- Syntax & Structure -->
+                <div class="question-item" data-question="What are the basic KQL syntax rules I must follow?">
+                    📝 What are the basic KQL syntax rules I must follow?
+                </div>
+                <div class="question-item" data-question="How is KQL different from SQL and why does it matter?">
+                    🔄 How is KQL different from SQL and why does it matter?
+                </div>
+                <div class="question-item" data-question="What are the most common KQL syntax mistakes to avoid?">
+                    ⚠️ What are the most common KQL syntax mistakes to avoid?
+                </div>
+                <div class="question-item" data-question="How do I structure a professional KQL query correctly?">
+                    🏗️ How do I structure a professional KQL query correctly?
+                </div>
+                <div class="question-item" data-question="Why do I get errors with uppercase KQL operators?">
+                    📢 Why do I get errors with uppercase KQL operators?
+                </div>
+                <div class="question-item" data-question="How do I properly format KQL for readability and maintenance?">
+                    📋 How do I properly format KQL for readability and maintenance?
+                </div>
+                <div class="question-item" data-question="What's the correct way to use pipes in KQL queries?">
+                    🔗 What's the correct way to use pipes in KQL queries?
+                </div>
+                
+                <!-- Joins & Advanced Operations -->
+                <div class="question-item" data-question="How do I properly join tables in KQL?">
+                    🔗 How do I properly join tables in KQL?
+                </div>
+                <div class="question-item" data-question="What join types should I use in different scenarios?">
+                    ↔️ What join types should I use in different scenarios?
+                </div>
+                <div class="question-item" data-question="How do I combine SecurityEvent and DeviceEvents effectively?">
+                    🤝 How do I combine SecurityEvent and DeviceEvents effectively?
+                </div>
+                <div class="question-item" data-question="What's the best way to correlate data across multiple tables?">
+                    🎯 What's the best way to correlate data across multiple tables?
+                </div>
+                <div class="question-item" data-question="How do I perform complex aggregations with summarize?">
+                    📈 How do I perform complex aggregations with summarize?
+                </div>
+                <div class="question-item" data-question="When should I use union versus join in KQL?">
+                    🤔 When should I use union versus join in KQL?
+                </div>
+                <div class="question-item" data-question="How do I create efficient subqueries and nested operations?">
+                    🧩 How do I create efficient subqueries and nested operations?
+                </div>
+                
+                <!-- Security & Threat Hunting -->
+                <div class="question-item" data-question="What EventIDs should I monitor for security threats?">
+                    🎯 What EventIDs should I monitor for security threats?
+                </div>
+                <div class="question-item" data-question="How do I detect failed login attempts and brute force attacks?">
+                    🔒 How do I detect failed login attempts and brute force attacks?
+                </div>
+                <div class="question-item" data-question="What are the best practices for threat hunting with KQL?">
+                    🕵️ What are the best practices for threat hunting with KQL?
+                </div>
+                <div class="question-item" data-question="How do I analyze suspicious process execution patterns?">
+                    ⚙️ How do I analyze suspicious process execution patterns?
+                </div>
+                <div class="question-item" data-question="What KQL queries help detect lateral movement?">
+                    🎪 What KQL queries help detect lateral movement?
+                </div>
+                <div class="question-item" data-question="How do I monitor for privilege escalation in KQL?">
+                    📈 How do I monitor for privilege escalation in KQL?
+                </div>
+                <div class="question-item" data-question="What are effective KQL patterns for malware detection?">
+                    🦠 What are effective KQL patterns for malware detection?
+                </div>
+                <div class="question-item" data-question="How do I create KQL queries for incident response?">
+                    🚨 How do I create KQL queries for incident response?
+                </div>
+                
+                <!-- Advanced Analytics -->
+                <div class="question-item" data-question="How do I use extend to create calculated fields effectively?">
+                    ➕ How do I use extend to create calculated fields effectively?
+                </div>
+                <div class="question-item" data-question="What are advanced KQL functions for security analytics?">
+                    🔬 What are advanced KQL functions for security analytics?
+                </div>
+                <div class="question-item" data-question="How do I implement statistical analysis in KQL queries?">
+                    📊 How do I implement statistical analysis in KQL queries?
+                </div>
+                <div class="question-item" data-question="How do I create dynamic thresholds and baselines in KQL?">
+                    📏 How do I create dynamic thresholds and baselines in KQL?
+                </div>
+                <div class="question-item" data-question="What are the best practices for time-based analysis in KQL?">
+                    ⌚ What are the best practices for time-based analysis in KQL?
+                </div>
+                
+                <!-- Data Types & Functions -->
+                <div class="question-item" data-question="How do I properly handle different data types in KQL?">
+                    🔢 How do I properly handle different data types in KQL?
+                </div>
+                <div class="question-item" data-question="What are the most useful string functions in KQL?">
+                    🎱 What are the most useful string functions in KQL?
+                </div>
+                <div class="question-item" data-question="How do I work with arrays and dynamic data in KQL?">
+                    📦 How do I work with arrays and dynamic data in KQL?
+                </div>
+                <div class="question-item" data-question="What datetime functions are essential for security analysis?">
+                    📅 What datetime functions are essential for security analysis?
+                </div>
+                <div class="question-item" data-question="How do I parse and extract data from complex log formats?">
+                    🧾 How do I parse and extract data from complex log formats?
+                </div>
+                
+                <!-- Query Analysis & Debugging -->
+                <div class="question-item" data-question="Explain my current query and suggest improvements">
+                    🔍 Explain my current query and suggest improvements
+                </div>
+                <div class="question-item" data-question="What can I improve in this query for better performance?">
+                    ⚡ What can I improve in this query for better performance?
+                </div>
+                <div class="question-item" data-question="How do I debug KQL queries that aren't returning expected results?">
+                    🐛 How do I debug KQL queries that aren't returning expected results?
+                </div>
+                <div class="question-item" data-question="Is my current query ready for production use?">
+                    ✅ Is my current query ready for production use?
+                </div>
+                <div class="question-item" data-question="How do I validate my KQL query logic and results?">
+                    🎯 How do I validate my KQL query logic and results?
+                </div>
+                
+                <!-- Enterprise & Best Practices -->
+                <div class="question-item" data-question="What are enterprise-grade KQL coding standards?">
+                    🏢 What are enterprise-grade KQL coding standards?
+                </div>
+                <div class="question-item" data-question="How do I document KQL queries for team collaboration?">
+                    📚 How do I document KQL queries for team collaboration?
+                </div>
+                <div class="question-item" data-question="What are KQL security best practices for SOC environments?">
+                    🛡️ What are KQL security best practices for SOC environments?
+                </div>
+                <div class="question-item" data-question="How do I create reusable KQL functions and templates?">
+                    🔄 How do I create reusable KQL functions and templates?
+                </div>
+                <div class="question-item" data-question="What are the compliance considerations for KQL in enterprise?">
+                    📋 What are the compliance considerations for KQL in enterprise?
+                </div>
+                
+                <!-- Advanced KQL Techniques -->
+                <div class="question-item" data-question="How do I create complex KQL functions and stored queries?">
+                    🔧 How do I create complex KQL functions and stored queries?
+                </div>
+                <div class="question-item" data-question="What are advanced window functions and their security applications?">
+                    🪟 What are advanced window functions and their security applications?
+                </div>
+                <div class="question-item" data-question="How do I implement machine learning detection patterns in KQL?">
+                    🤖 How do I implement machine learning detection patterns in KQL?
+                </div>
+                <div class="question-item" data-question="What are the best practices for KQL error handling and resilience?">
+                    🛡️ What are the best practices for KQL error handling and resilience?
+                </div>
+                
+                <!-- Security Operations Center (SOC) Specific -->
+                <div class="question-item" data-question="How do I create automated threat hunting queries for 24/7 SOC?">
+                    🕵️ How do I create automated threat hunting queries for 24/7 SOC?
+                </div>
+                <div class="question-item" data-question="What KQL patterns detect insider threats and data exfiltration?">
+                    👁️ What KQL patterns detect insider threats and data exfiltration?
+                </div>
+                <div class="question-item" data-question="How do I build KQL queries for compliance reporting and auditing?">
+                    📋 How do I build KQL queries for compliance reporting and auditing?
+                </div>
+                <div class="question-item" data-question="What are effective KQL queries for incident triage and prioritization?">
+                    🚨 What are effective KQL queries for incident triage and prioritization?
+                </div>
+                
+                <!-- Data Analysis & Visualization -->
+                <div class="question-item" data-question="How do I create dynamic dashboards and visualizations with KQL?">
+                    📊 How do I create dynamic dashboards and visualizations with KQL?
+                </div>
+                <div class="question-item" data-question="What are advanced time series analysis techniques in KQL?">
+                    📈 What are advanced time series analysis techniques in KQL?
+                </div>
+                <div class="question-item" data-question="How do I implement real-time alerting logic with KQL queries?">
+                    ⚡ How do I implement real-time alerting logic with KQL queries?
+                </div>
+                <div class="question-item" data-question="What are the best practices for KQL query parameterization?">
+                    🎛️ What are the best practices for KQL query parameterization?
+                </div>
+                
+                <!-- Advanced Security Scenarios -->
+                <div class="question-item" data-question="How do I correlate events across hybrid cloud environments?">
+                    ☁️ How do I correlate events across hybrid cloud environments?
+                </div>
+                <div class="question-item" data-question="What KQL techniques help with APT and sophisticated attack detection?">
+                    🎯 What KQL techniques help with APT and sophisticated attack detection?
+                </div>
+                <div class="question-item" data-question="How do I analyze container and Kubernetes security events in KQL?">
+                    🐳 How do I analyze container and Kubernetes security events in KQL?
+                </div>
+                <div class="question-item" data-question="What are advanced IoT and OT security monitoring patterns?">
+                    🏭 What are advanced IoT and OT security monitoring patterns?
+                </div>
+                
+                <!-- Performance & Scale -->
+                <div class="question-item" data-question="How do I optimize KQL queries for petabyte-scale security data?">
+                    🚀 How do I optimize KQL queries for petabyte-scale security data?
+                </div>
+                <div class="question-item" data-question="What are the memory and CPU optimization techniques for complex KQL?">
+                    💾 What are the memory and CPU optimization techniques for complex KQL?
+                </div>
+                <div class="question-item" data-question="How do I implement efficient data retention and archival strategies?">
+                    🗄️ How do I implement efficient data retention and archival strategies?
+                </div>
+                <div class="question-item" data-question="What are the best practices for KQL query monitoring and alerting?">
+                    📊 What are the best practices for KQL query monitoring and alerting?
+                </div>
+                
+                <!-- Integration & Automation -->
+                <div class="question-item" data-question="How do I integrate KQL with SOAR platforms and automation tools?">
+                    🤖 How do I integrate KQL with SOAR platforms and automation tools?
+                </div>
+                <div class="question-item" data-question="What are the best practices for KQL API integration and programming?">
+                    💻 What are the best practices for KQL API integration and programming?
+                </div>
+                <div class="question-item" data-question="How do I create KQL-based custom connectors and data pipelines?">
+                    🔌 How do I create KQL-based custom connectors and data pipelines?
+                </div>
+                <div class="question-item" data-question="What are advanced techniques for KQL query version control and deployment?">
+                    📦 What are advanced techniques for KQL query version control and deployment?
+                </div>
+                
+                <!-- Specialized Industries -->
+                <div class="question-item" data-question="How do I adapt KQL for financial services security requirements?">
+                    🏦 How do I adapt KQL for financial services security requirements?
+                </div>
+                <div class="question-item" data-question="What are healthcare-specific KQL patterns for HIPAA compliance?">
+                    🏥 What are healthcare-specific KQL patterns for HIPAA compliance?
+                </div>
+                <div class="question-item" data-question="How do I implement government and defense-grade KQL security patterns?">
+                    🛡️ How do I implement government and defense-grade KQL security patterns?
+                </div>
+                <div class="question-item" data-question="What are retail and e-commerce specific threat detection patterns?">
+                    🛒 What are retail and e-commerce specific threat detection patterns?
+                </div>
             </div>
         </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message message-ai">
+                <strong>🛡️ MXDR365 KQL Guardian Online</strong><br><br>
+                Your enterprise KQL expert is ready! I specialize in:<br><br>
+                🎯 <strong>Query Validation:</strong> Catching fake tables and syntax errors<br>
+                ⚡ <strong>Performance Optimization:</strong> Making queries lightning fast<br>
+                🛡️ <strong>Security Best Practices:</strong> Enterprise-grade recommendations<br>
+                📊 <strong>Advanced Analytics:</strong> Complex query design and logic<br><br>
+                💡 <strong>Click "Quick Expert Questions" above or type your KQL question below!</strong>
+            </div>
+        </div>
+        
         <div class="chat-input-area">
-            <input type="text" class="chat-input" id="chatInput" placeholder="Ask about KQL..." onkeypress="if(event.key==='Enter') sendChatMessage()">
-            <button class="chat-send" onclick="sendChatMessage()">Send</button>
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask your KQL question..." />
+            <button class="chat-send" id="chatSend">Send</button>
         </div>
     </div>
 
     <script>
-        // Valid Microsoft security tables
-        const VALID_TABLES = new Set([
-            'SecurityEvent', 'SigninLogs', 'AuditLogs', 'DeviceEvents', 'DeviceProcessEvents',
-            'DeviceNetworkEvents', 'DeviceFileEvents', 'DeviceRegistryEvents', 'DeviceLogonEvents',
-            'IdentityInfo', 'IdentityDirectoryEvents', 'IdentityLogonEvents', 'IdentityQueryEvents',
-            'EmailEvents', 'EmailAttachmentInfo', 'EmailUrlInfo', 'EmailPostDeliveryEvents',
-            'AlertInfo', 'AlertEvidence', 'ThreatIntelligenceIndicator', 'DeviceInfo',
-            'Heartbeat', 'Usage', 'Operation', 'Perf', 'Event', 'Syslog', 'SecurityAlert',
-            'SecurityIncident', 'CommonSecurityLog', 'AADNonInteractiveUserSignInLogs',
-            'AADServicePrincipalSignInLogs', 'AADManagedIdentitySignInLogs', 'DeviceNetworkInfo',
-            'DeviceTvmSoftwareInventory', 'DeviceTvmSoftwareVulnerabilities', 'AppFileEvents',
-            'BehaviorAnalytics', 'CloudAppEvents', 'UrlClickEvents', 'OfficeActivity',
-            'PowerBIAudit', 'AzureActivity', 'AzureDiagnostics', 'WindowsEvent', 'Watchlist'
-        ]);
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('gradeBtn').addEventListener('click', gradeQuery);
-            console.log('🚀 Kusto Overlord initialized - SIMPLE VERSION');
-        });
-
-        function gradeQuery() {
-            console.log('🎯 Starting query analysis...');
-            
-            const query = document.getElementById('queryInput').value.trim();
-            
-            if (!query) {
-                alert('Please enter a KQL query to grade.');
-                return;
+        // MXDR365 KQL Analysis Engine - BULLETPROOF IMPLEMENTATION
+        class MXDR365Analyzer {
+            constructor() {
+                this.validTables = new Set([
+                    'SecurityEvent', 'SigninLogs', 'AuditLogs', 'DeviceEvents', 'DeviceProcessEvents',
+                    'DeviceNetworkEvents', 'DeviceFileEvents', 'DeviceRegistryEvents', 'DeviceLogonEvents',
+                    'IdentityInfo', 'IdentityDirectoryEvents', 'IdentityLogonEvents', 'IdentityQueryEvents',
+                    'EmailEvents', 'EmailAttachmentInfo', 'EmailUrlInfo', 'EmailPostDeliveryEvents',
+                    'AlertInfo', 'AlertEvidence', 'ThreatIntelligenceIndicator', 'DeviceInfo',
+                    'Heartbeat', 'Usage', 'Operation', 'Perf', 'Event', 'Syslog', 'SecurityAlert',
+                    'SecurityIncident', 'CommonSecurityLog', 'AADNonInteractiveUserSignInLogs',
+                    'AADServicePrincipalSignInLogs', 'AADManagedIdentitySignInLogs', 'DeviceNetworkInfo',
+                    'DeviceTvmSoftwareInventory', 'DeviceTvmSoftwareVulnerabilities', 'AppFileEvents',
+                    'BehaviorAnalytics', 'CloudAppEvents', 'UrlClickEvents', 'OfficeActivity',
+                    'PowerBIAudit', 'AzureActivity', 'AzureDiagnostics', 'WindowsEvent', 'Watchlist'
+                ]);
+                
+                this.initializeEventListeners();
+                console.log('🛡️ MXDR365 Analysis Engine initialized successfully');
             }
-
-            try {
-                const analysis = analyzeQuery(query);
-                displayResults(analysis);
-                console.log('✅ Analysis complete:', analysis.score + '/1000');
-            } catch (error) {
-                console.error('❌ Analysis failed:', error);
-                showError('Analysis failed: ' + error.message);
-            }
-        }
-
-        function analyzeQuery(query) {
-            console.log('🔍 Analyzing:', query.substring(0, 50) + '...');
             
-            const result = {
-                score: 1000,
-                grade: 'Excellent',
-                issues: [],
-                status: 'PASS'
-            };
-
-            // Check for fake content FIRST
-            if (isFakeQuery(query)) {
-                result.score = 0;
-                result.grade = 'Fail';
-                result.status = 'AUTO_FAIL';
-                result.issues.push({
-                    severity: 'critical',
-                    title: '🚨 FAKE QUERY DETECTED',
-                    description: 'This query contains fake table names, field lists, or invalid content that would never work in Microsoft environments.',
-                    fix: 'Use real Microsoft security tables like SecurityEvent, SigninLogs, DeviceEvents, etc. Write proper KQL syntax starting with a table name.'
+            initializeEventListeners() {
+                // Analysis button
+                document.getElementById('analyzeBtn').addEventListener('click', () => {
+                    this.analyzeQuery();
                 });
-                console.log('❌ Fake query detected');
-                return result;
+                
+                // Chat functionality
+                document.getElementById('chatToggle').addEventListener('click', () => {
+                    this.openChat();
+                });
+                
+                document.getElementById('chatClose').addEventListener('click', () => {
+                    this.closeChat();
+                });
+                
+                document.getElementById('questionsToggle').addEventListener('click', () => {
+                    this.toggleQuestions();
+                });
+                
+                document.getElementById('chatSend').addEventListener('click', () => {
+                    this.sendMessage();
+                });
+                
+                document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendMessage();
+                    }
+                });
+                
+                // Quick questions
+                document.querySelectorAll('.question-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const question = item.getAttribute('data-question');
+                        this.askQuickQuestion(question);
+                    });
+                });
             }
-
-            // Validate tables
-            const tableIssues = validateTables(query);
-            if (tableIssues.length > 0) {
-                result.score -= 500;
-                result.issues.push(...tableIssues);
-                console.log('❌ Table validation issues:', tableIssues.length);
-            }
-
-            // Check performance
-            const perfIssues = checkPerformance(query);
-            if (perfIssues.length > 0) {
-                result.score -= perfIssues.length * 100;
-                result.issues.push(...perfIssues);
-                console.log('⚠️ Performance issues:', perfIssues.length);
-            }
-
-            // Check syntax
-            const syntaxIssues = checkSyntax(query);
-            if (syntaxIssues.length > 0) {
-                result.score -= syntaxIssues.length * 50;
-                result.issues.push(...syntaxIssues);
-                console.log('⚠️ Syntax issues:', syntaxIssues.length);
-            }
-
-            // Final scoring
-            result.score = Math.max(0, result.score);
-            const percentage = (result.score / 1000) * 100;
             
-            if (percentage >= 90) result.grade = 'Excellent';
-            else if (percentage >= 80) result.grade = 'Good';
-            else if (percentage >= 60) result.grade = 'Poor';
-            else result.grade = 'Fail';
-
-            if (result.score < 600) result.status = 'FAIL';
-            else if (result.score < 800) result.status = 'NEEDS_WORK';
-
-            return result;
-        }
-
-        function isFakeQuery(query) {
-            const lower = query.toLowerCase();
-            
-            // Fake patterns that should auto-fail
-            const fakePatterns = [
-                'faketable', 'testtable', 'dummytable', 'sampletable',
-                'hasoffhoursactivity', 'hasweekendactivity', 'offhoursconnections',
-                'weekendconnections', 'threatlevel', 'maxriskscore', 'threatcategories',
-                'isnewbaseline', 'suspiciousactivity', 'riskassessment'
-            ];
-            
-            // Check for any fake patterns
-            for (const pattern of fakePatterns) {
-                if (lower.includes(pattern)) {
-                    console.log('❌ Fake pattern found:', pattern);
-                    return true;
+            analyzeQuery() {
+                const query = document.getElementById('queryEditor').value.trim();
+                
+                if (!query) {
+                    this.showAlert('Please enter a KQL query to analyze.');
+                    return;
+                }
+                
+                console.log('🎯 Analyzing query:', query.substring(0, 100) + '...');
+                
+                try {
+                    const analysis = this.performAnalysis(query);
+                    this.displayResults(analysis);
+                    console.log('✅ Analysis completed successfully');
+                } catch (error) {
+                    console.error('❌ Analysis error:', error);
+                    this.showAlert('Analysis failed: ' + error.message);
                 }
             }
-
-            // Check if it's just a field list (not proper KQL)
-            if (!query.includes('|') && query.includes(',') && query.split(',').length > 2) {
-                console.log('❌ Field list detected (not proper KQL)');
-                return true;
-            }
-
-            // Check if starts with valid table
-            const firstLine = query.trim().split('\n')[0].trim();
-            const firstWord = firstLine.split(/\s+|\|/)[0];
             
-            if (!VALID_TABLES.has(firstWord) && !firstWord.toLowerCase().startsWith('let')) {
-                console.log('❌ Invalid starting table:', firstWord);
-                return true;
-            }
-
-            return false;
-        }
-
-        function validateTables(query) {
-            const issues = [];
-            const lines = query.split('\n').filter(line => line.trim() && !line.trim().startsWith('//'));
-            
-            if (lines.length === 0) return issues;
-            
-            const firstLine = lines[0].trim();
-            if (firstLine.toLowerCase().startsWith('let ')) return issues;
-            
-            const tableName = firstLine.split(/\s+|\|/)[0];
-            
-            if (!VALID_TABLES.has(tableName)) {
-                issues.push({
-                    severity: 'critical',
-                    title: 'Invalid Table Reference',
-                    description: `Table "${tableName}" does not exist in Microsoft security environments.`,
-                    fix: 'Use valid tables like SecurityEvent, SigninLogs, DeviceEvents, AlertInfo, etc.'
-                });
-            }
-            
-            return issues;
-        }
-
-        function checkPerformance(query) {
-            const issues = [];
-            
-            // Missing time filter
-            if (!query.match(/TimeGenerated.*ago\(/i)) {
-                const firstLine = query.trim().split('\n')[0].trim();
-                const tableName = firstLine.split(/\s+|\|/)[0];
-                const timeSeriesTables = ['SecurityEvent', 'SigninLogs', 'DeviceEvents', 'Event'];
+            performAnalysis(query) {
+                const analysis = {
+                    query: query,
+                    score: 1000,
+                    maxScore: 1000,
+                    grade: 'Excellent',
+                    status: 'PASS',
+                    issues: [],
+                    recommendations: []
+                };
                 
-                if (timeSeriesTables.includes(tableName)) {
-                    issues.push({
+                // Step 1: Check for fake/invalid content (INSTANT 0)
+                if (this.isFakeQuery(query)) {
+                    analysis.score = 0;
+                    analysis.grade = 'Fail';
+                    analysis.status = 'AUTO_FAIL';
+                    analysis.issues.push({
+                        severity: 'critical',
+                        title: '🚨 INVALID QUERY DETECTED',
+                        description: 'This query contains fake table names, invalid field lists, or syntax that would never work in Microsoft security environments.',
+                        fix: 'Use only real Microsoft security tables like SecurityEvent, SigninLogs, DeviceEvents, etc. Write proper KQL syntax starting with a valid table name.'
+                    });
+                    return analysis;
+                }
+                
+                // Step 2: Table validation (Progressive scoring)
+                const tableIssues = this.validateTables(query);
+                if (tableIssues.length > 0) {
+                    analysis.score -= (tableIssues.length * 200); // -200 per invalid table
+                    analysis.issues.push(...tableIssues);
+                }
+                
+                // Step 3: Performance analysis (Graduated penalties)
+                const perfIssues = this.analyzePerformance(query);
+                analysis.score -= perfIssues.penalty;
+                analysis.issues.push(...perfIssues.issues);
+                
+                // Step 4: Syntax validation (Minor penalties)
+                const syntaxIssues = this.validateSyntax(query);
+                analysis.score -= syntaxIssues.penalty;
+                analysis.issues.push(...syntaxIssues.issues);
+                
+                // Step 5: Best practices check (Minor deductions)
+                const bestPracticeIssues = this.checkBestPractices(query);
+                analysis.score -= bestPracticeIssues.penalty;
+                analysis.issues.push(...bestPracticeIssues.issues);
+                
+                // Step 6: Advanced features bonus (Can go above 1000)
+                const bonusPoints = this.calculateBonusPoints(query);
+                analysis.score += bonusPoints;
+                
+                // Calculate final grade with realistic ranges
+                analysis.score = Math.max(0, analysis.score);
+                const percentage = (analysis.score / analysis.maxScore) * 100;
+                
+                if (percentage >= 95) {
+                    analysis.grade = 'Excellent';
+                    analysis.status = 'PRODUCTION_READY';
+                } else if (percentage >= 85) {
+                    analysis.grade = 'Good';
+                    analysis.status = 'MINOR_IMPROVEMENTS';
+                } else if (percentage >= 70) {
+                    analysis.grade = 'Fair';
+                    analysis.status = 'NEEDS_OPTIMIZATION';
+                } else if (percentage >= 50) {
+                    analysis.grade = 'Poor';
+                    analysis.status = 'MAJOR_REWORK';
+                } else {
+                    analysis.grade = 'Fail';
+                    analysis.status = 'COMPLETE_REWRITE';
+                }
+                
+                analysis.recommendations = this.generateRecommendations(analysis);
+                
+                return analysis;
+            }
+            
+            isFakeQuery(query) {
+                const trimmed = query.trim().toLowerCase();
+                
+                // Check for obvious fake patterns
+                const fakePatterns = [
+                    /^[a-z,\s]+$/i, // Just comma-separated words
+                    /faketable|testtable|dummytable|sampletable/i,
+                    /hasoffhoursactivity|hasweekendactivity|offhoursconnections/i,
+                    /weekendconnections|threatLevel|maxriskscore|threatcategories/i,
+                    /isnewbaseline|suspiciousactivity|riskassessment/i
+                ];
+                
+                for (const pattern of fakePatterns) {
+                    if (pattern.test(query)) {
+                        console.log('❌ Fake pattern detected:', pattern.source);
+                        return true;
+                    }
+                }
+                
+                // Check if it's just a field list without proper KQL structure
+                if (!query.includes('|') && query.includes(',') && query.split(',').length > 2) {
+                    const hasKQLKeywords = /where|project|summarize|extend|join|order|top|count/i.test(query);
+                    if (!hasKQLKeywords) {
+                        console.log('❌ Field list without KQL structure detected');
+                        return true;
+                    }
+                }
+                
+                // Check if starts with valid table or let statement
+                const lines = query.split('\n').filter(line => line.trim() && !line.trim().startsWith('//'));
+                if (lines.length > 0) {
+                    const firstLine = lines[0].trim();
+                    const firstWord = firstLine.split(/\s+|\|/)[0];
+                    
+                    if (!this.validTables.has(firstWord) && !firstWord.toLowerCase().startsWith('let')) {
+                        console.log('❌ Invalid starting table:', firstWord);
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            validateTables(query) {
+                const issues = [];
+                const lines = query.split('\n').filter(line => line.trim() && !line.trim().startsWith('//'));
+                
+                if (lines.length === 0) return issues;
+                
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed.startsWith('|') || trimmed.toLowerCase().startsWith('let ')) continue;
+                    
+                    const tableName = trimmed.split(/\s+|\|/)[0];
+                    if (tableName && !this.validTables.has(tableName)) {
+                        issues.push({
+                            severity: 'critical',
+                            title: 'Invalid Table Reference',
+                            description: `Table "${tableName}" does not exist in Microsoft security environments.`,
+                            fix: 'Use valid tables: SecurityEvent, SigninLogs, DeviceEvents, AlertInfo, CommonSecurityLog, etc.'
+                        });
+                    }
+                }
+                
+                return issues;
+            }
+            
+            analyzePerformance(query) {
+                const result = { penalty: 0, issues: [] };
+                
+                // Missing time filter check (MAJOR ISSUE)
+                if (!query.match(/TimeGenerated\s*[><=]\s*ago\(/i)) {
+                    const tables = this.extractTableNames(query);
+                    const timeSeriesTables = ['SecurityEvent', 'SigninLogs', 'DeviceEvents', 'Event', 'Syslog'];
+                    
+                    if (tables.some(table => timeSeriesTables.includes(table))) {
+                        result.penalty += 250; // Reduced from 300
+                        result.issues.push({
+                            severity: 'critical',
+                            title: 'Missing Critical Time Filter',
+                            description: 'Time-series queries without TimeGenerated filters will scan massive historical datasets, causing poor performance and high costs.',
+                            fix: 'Add "| where TimeGenerated > ago(7d)" as your first filter operation.'
+                        });
+                    }
+                }
+                
+                // Project * check (MODERATE ISSUE)
+                if (query.match(/\|\s*project\s+\*/gi)) {
+                    result.penalty += 80; // Reduced from 100
+                    result.issues.push({
                         severity: 'major',
-                        title: 'Missing Time Filter',
-                        description: 'Queries on time-series data should include TimeGenerated filters for performance.',
-                        fix: 'Add: | where TimeGenerated > ago(7d)'
+                        title: 'Inefficient Wildcard Projection',
+                        description: 'Using "project *" selects all columns, significantly increasing data transfer and processing costs.',
+                        fix: 'Specify only needed columns: | project TimeGenerated, Computer, Account'
                     });
                 }
+                
+                // Very large time ranges (NEW CHECK)
+                const largeTimeRange = query.match(/ago\((\d+)d\)/gi);
+                if (largeTimeRange) {
+                    largeTimeRange.forEach(match => {
+                        const days = parseInt(match.match(/\d+/)[0]);
+                        if (days > 30) {
+                            result.penalty += 40;
+                            result.issues.push({
+                                severity: 'minor',
+                                title: 'Large Time Range',
+                                description: `Query scans ${days} days of data. Consider if this large range is necessary.`,
+                                fix: 'Reduce time range if possible or ensure proper indexing'
+                            });
+                        }
+                    });
+                }
+                
+                // No filters at all (NEW CHECK)
+                if (!query.includes('where')) {
+                    result.penalty += 60;
+                    result.issues.push({
+                        severity: 'major',
+                        title: 'No Filtering Applied',
+                        description: 'Query lacks any where clauses, which may return excessive data.',
+                        fix: 'Add appropriate where clauses to filter data'
+                    });
+                }
+                
+                return result;
             }
-
-            // Wildcard projection
-            if (query.match(/\|\s*project\s+\*/i)) {
-                issues.push({
-                    severity: 'minor',
-                    title: 'Wildcard Projection',
-                    description: 'Using "project *" can impact performance and costs.',
-                    fix: 'Specify only needed columns: | project Computer, Account, TimeGenerated'
-                });
+            
+            checkBestPractices(query) {
+                const result = { penalty: 0, issues: [] };
+                
+                // Check for comments (POSITIVE)
+                if (!query.includes('//')) {
+                    result.penalty += 20;
+                    result.issues.push({
+                        severity: 'minor',
+                        title: 'Missing Documentation',
+                        description: 'Professional queries should include comments explaining purpose.',
+                        fix: 'Add // comments to document query purpose and logic'
+                    });
+                }
+                
+                // Check for proper ordering
+                if (query.includes('summarize') && !query.includes('order')) {
+                    result.penalty += 15;
+                    result.issues.push({
+                        severity: 'minor',
+                        title: 'Results Not Ordered',
+                        description: 'Aggregated results should typically be ordered for consistency.',
+                        fix: 'Add "| order by ColumnName desc" to sort results'
+                    });
+                }
+                
+                // Check for take/limit for safety
+                if (!query.includes('take') && !query.includes('top') && !query.includes('limit')) {
+                    result.penalty += 25;
+                    result.issues.push({
+                        severity: 'minor',
+                        title: 'No Result Limit',
+                        description: 'Queries should include result limits to prevent accidental large outputs.',
+                        fix: 'Add "| take 100" or "| top 50 by Column" to limit results'
+                    });
+                }
+                
+                return result;
             }
-
-            return issues;
-        }
-
-        function checkSyntax(query) {
-            const issues = [];
             
-            // SQL syntax
-            if (query.match(/SELECT\s+.*FROM\s+/i)) {
-                issues.push({
-                    severity: 'major',
-                    title: 'SQL Syntax Detected',
-                    description: 'Query uses SQL syntax instead of KQL.',
-                    fix: 'Use KQL syntax: start with table name, use "project" instead of "SELECT"'
-                });
+            calculateBonusPoints(query) {
+                let bonus = 0;
+                
+                // Bonus for advanced operations
+                if (query.includes('join')) bonus += 20;
+                if (query.includes('union')) bonus += 15;
+                if (query.includes('let ')) bonus += 25;
+                if (query.includes('extend')) bonus += 10;
+                if (query.includes('materialize')) bonus += 30;
+                if (query.includes('evaluate')) bonus += 35;
+                
+                // Bonus for security-specific patterns
+                if (query.match(/EventID\s*==\s*\d+/)) bonus += 15;
+                if (query.includes('summarize') && query.includes('by')) bonus += 10;
+                if (query.includes('bin(TimeGenerated')) bonus += 20;
+                
+                // Bonus for proper formatting
+                const lines = query.split('\n').length;
+                if (lines > 3) bonus += 5; // Multi-line formatting
+                
+                return Math.min(bonus, 100); // Cap bonus at 100 points
             }
-
-            // Uppercase operators
-            if (query.match(/\b(WHERE|PROJECT|SUMMARIZE|ORDER)\b/)) {
-                issues.push({
-                    severity: 'minor',
-                    title: 'Uppercase Operators',
-                    description: 'KQL operators should be lowercase.',
-                    fix: 'Use: where, project, summarize, order (lowercase)'
-                });
+            
+            validateSyntax(query) {
+                const result = { penalty: 0, issues: [] };
+                
+                // SQL syntax check
+                if (query.match(/SELECT\s+.*FROM\s+/gi)) {
+                    result.penalty += 200;
+                    result.issues.push({
+                        severity: 'major',
+                        title: 'SQL Syntax in KQL Query',
+                        description: 'Query uses SQL syntax instead of KQL syntax.',
+                        fix: 'Convert to KQL: use table name first, then "| project" instead of "SELECT FROM"'
+                    });
+                }
+                
+                // Uppercase operators
+                if (query.match(/\b(WHERE|PROJECT|SUMMARIZE|EXTEND|ORDER)\b/g)) {
+                    result.penalty += 50;
+                    result.issues.push({
+                        severity: 'minor',
+                        title: 'Incorrect Operator Casing',
+                        description: 'KQL operators should be lowercase for best practices.',
+                        fix: 'Use lowercase: where, project, summarize, extend, order'
+                    });
+                }
+                
+                return result;
             }
-
-            return issues;
-        }
-
-        function displayResults(analysis) {
-            const results = document.getElementById('results');
-            results.innerHTML = '';
-
-            // Score display
-            const scoreDiv = document.createElement('div');
-            scoreDiv.className = 'score-display';
             
-            const scoreClass = analysis.score >= 800 ? 'score-excellent' : 
-                             analysis.score >= 600 ? 'score-good' : 
-                             analysis.score >= 300 ? 'score-poor' : 'score-fail';
+            extractTableNames(query) {
+                const lines = query.split('\n').filter(line => line.trim() && !line.trim().startsWith('//'));
+                const tables = [];
+                
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed.startsWith('|') && !trimmed.toLowerCase().startsWith('let ')) {
+                        const tableName = trimmed.split(/\s+|\|/)[0];
+                        if (tableName) tables.push(tableName);
+                    }
+                }
+                
+                return tables;
+            }
             
-            const gradeClass = 'grade-' + analysis.grade.toLowerCase();
-            const statusIcon = analysis.status === 'AUTO_FAIL' ? '🚨' : 
-                              analysis.score >= 800 ? '🏆' : 
-                              analysis.score >= 600 ? '✅' : 
-                              analysis.score >= 300 ? '⚠️' : '❌';
+            generateRecommendations(analysis) {
+                const recommendations = [];
+                
+                if (analysis.score === 0) {
+                    recommendations.push('🚨 Complete query rewrite required - use only valid Microsoft security tables with proper KQL syntax.');
+                } else if (analysis.score < 600) {
+                    recommendations.push('🔧 Major improvements needed - address critical validation and performance issues before production use.');
+                } else if (analysis.score < 800) {
+                    recommendations.push('⚡ Good foundation with optimization opportunities - implement performance improvements for production readiness.');
+                } else if (analysis.score < 950) {
+                    recommendations.push('✅ Excellent query structure - minor refinements will achieve enterprise perfection.');
+                } else {
+                    recommendations.push('🏆 Outstanding enterprise-grade query - exemplary KQL that follows all best practices!');
+                }
+                
+                return recommendations;
+            }
             
-            scoreDiv.innerHTML = `
-                <div class="score-number ${scoreClass}">${analysis.score}/1000</div>
-                <div class="grade-badge ${gradeClass}">${statusIcon} ${analysis.grade}</div>
-                <div style="margin-top: 10px; color: #605e5c;">
-                    ${Math.round((analysis.score / 1000) * 100)}% | Status: ${analysis.status}
-                </div>
-            `;
-            
-            results.appendChild(scoreDiv);
-
-            // Issues
-            if (analysis.issues.length > 0) {
-                analysis.issues.forEach(issue => {
-                    const issueDiv = document.createElement('div');
-                    issueDiv.className = `issue issue-${issue.severity}`;
-                    
-                    issueDiv.innerHTML = `
-                        <div class="issue-title">${issue.title}</div>
-                        <div class="issue-desc">${issue.description}</div>
-                        <div class="issue-fix"><strong>Fix:</strong> ${issue.fix}</div>
-                    `;
-                    
-                    results.appendChild(issueDiv);
-                });
-            } else {
-                const successDiv = document.createElement('div');
-                successDiv.className = 'issue';
-                successDiv.style.borderLeftColor = '#107c10';
-                successDiv.innerHTML = `
-                    <div class="issue-title">✅ No Issues Found</div>
-                    <div class="issue-desc">Your query follows KQL best practices!</div>
+            displayResults(analysis) {
+                const resultsContainer = document.getElementById('analysisResults');
+                resultsContainer.innerHTML = '';
+                
+                // Score display
+                const scoreDiv = document.createElement('div');
+                scoreDiv.className = 'score-display';
+                
+                const gradeClass = 'grade-' + analysis.grade.toLowerCase();
+                const statusIcon = this.getStatusIcon(analysis.status);
+                
+                scoreDiv.innerHTML = `
+                    <div class="score-number">${analysis.score}/1000</div>
+                    <div class="score-grade ${gradeClass}">${statusIcon} ${analysis.grade}</div>
+                    <div style="margin-top: 15px; color: #605e5c; font-size: 1rem;">
+                        <strong>Status:</strong> ${analysis.status.replace(/_/g, ' ')}<br>
+                        <strong>Quality:</strong> ${Math.round((analysis.score / analysis.maxScore) * 100)}% Enterprise Standard
+                    </div>
                 `;
-                results.appendChild(successDiv);
-            }
-
-            console.log('✅ Results displayed successfully');
-        }
-
-        function showError(message) {
-            const results = document.getElementById('results');
-            results.innerHTML = `
-                <div class="issue issue-critical">
-                    <div class="issue-title">❌ Error</div>
-                    <div class="issue-desc">${message}</div>
-                </div>
-            `;
-        }
-
-        // Chat functions
-        function toggleChat() {
-            const panel = document.getElementById('chatPanel');
-            const toggle = document.querySelector('.chat-toggle');
-            
-            if (panel.style.display === 'flex') {
-                panel.style.display = 'none';
-                toggle.style.display = 'block';
-            } else {
-                panel.style.display = 'flex';
-                toggle.style.display = 'none';
-            }
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            const chatBody = document.getElementById('chatBody');
-            
-            // Add user message
-            const userMsg = document.createElement('div');
-            userMsg.className = 'message message-user';
-            userMsg.textContent = message;
-            chatBody.appendChild(userMsg);
-            
-            // Clear input
-            input.value = '';
-            
-            // Add AI response
-            setTimeout(() => {
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'message message-ai';
-                aiMsg.innerHTML = generateResponse(message);
-                chatBody.appendChild(aiMsg);
-                chatBody.scrollTop = chatBody.scrollHeight;
-            }, 300);
-            
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-
-        function generateResponse(message) {
-            const currentQuery = document.getElementById('queryInput').value.trim();
-            const lower = message.toLowerCase();
-            
-            if (lower.includes('fake') || lower.includes('table')) {
-                return `<strong>🛡️ Fake vs Valid Tables:</strong><br><br>
-                <strong>❌ FAKE (Auto-Fail):</strong><br>
-                • FakeTable, TestTable, DummyTable<br>
-                • HasOffHoursActivity, WeekendConnections<br>
-                • Field lists without proper structure<br><br>
-                <strong>✅ VALID Microsoft Tables:</strong><br>
-                • SecurityEvent - Windows security logs<br>
-                • SigninLogs - Azure AD authentication<br>
-                • DeviceEvents - Endpoint security events<br>
-                • AlertInfo - Security alerts<br><br>
-                💡 Always start with a real table name!`;
+                
+                resultsContainer.appendChild(scoreDiv);
+                
+                // Recommendations
+                if (analysis.recommendations.length > 0) {
+                    const recDiv = document.createElement('div');
+                    recDiv.className = 'issue-card';
+                    recDiv.innerHTML = `
+                        <div class="issue-title">💡 MXDR365 Expert Recommendations</div>
+                        <div class="issue-description">${analysis.recommendations.join(' ')}</div>
+                    `;
+                    resultsContainer.appendChild(recDiv);
+                }
+                
+                // Issues
+                if (analysis.issues.length > 0) {
+                    analysis.issues.forEach(issue => {
+                        const issueDiv = document.createElement('div');
+                        issueDiv.className = `issue-card issue-${issue.severity}`;
+                        
+                        const severityIcon = this.getSeverityIcon(issue.severity);
+                        
+                        issueDiv.innerHTML = `
+                            <div class="issue-title">${severityIcon} ${issue.title}</div>
+                            <div class="issue-description">${issue.description}</div>
+                            <div class="issue-fix"><strong>Solution:</strong> ${issue.fix}</div>
+                        `;
+                        
+                        resultsContainer.appendChild(issueDiv);
+                    });
+                } else {
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'issue-card';
+                    successDiv.innerHTML = `
+                        <div class="issue-title">🎉 Perfect Query Structure</div>
+                        <div class="issue-description">No issues detected! This query follows enterprise KQL best practices.</div>
+                    `;
+                    resultsContainer.appendChild(successDiv);
+                }
+                
+                console.log('✅ Results displayed successfully');
             }
             
-            if (lower.includes('optimize') || lower.includes('performance')) {
-                return `<strong>🚀 Performance Tips:</strong><br><br>
-                ${currentQuery ? 'For your current query:' : 'General advice:'}<br><br>
-                1. <strong>Add time filtering:</strong><br>
-                   | where TimeGenerated > ago(7d)<br><br>
-                2. <strong>Specify columns:</strong><br>
-                   | project Computer, Account, TimeGenerated<br><br>
-                3. <strong>Filter early:</strong><br>
-                   Apply where clauses before computations<br><br>
-                ${currentQuery && !currentQuery.includes('TimeGenerated') ? '⚠️ Your query needs time filtering!' : ''}`;
+            getStatusIcon(status) {
+                const icons = {
+                    'AUTO_FAIL': '🚨',
+                    'COMPLETE_REWRITE': '❌',
+                    'MAJOR_REWORK': '⚠️',
+                    'NEEDS_OPTIMIZATION': '🔧',
+                    'MINOR_IMPROVEMENTS': '⚡',
+                    'PRODUCTION_READY': '✅',
+                    'PASS': '🏆'
+                };
+                return icons[status] || '📊';
             }
             
-            if (lower.includes('syntax') || lower.includes('help')) {
-                return `<strong>📝 KQL Syntax Rules:</strong><br><br>
-                <strong>Structure:</strong><br>
-                TableName<br>
-                | where condition<br>
-                | project columns<br><br>
-                <strong>Key Points:</strong><br>
-                • Start with table name (not SELECT)<br>
-                • Use lowercase operators<br>
-                • Single | between operations<br>
-                • No semicolons needed<br><br>
-                <strong>Common Mistakes:</strong><br>
-                ❌ WHERE → ✅ where<br>
-                ❌ SELECT FROM → ✅ TableName | project`;
+            getSeverityIcon(severity) {
+                const icons = {
+                    'critical': '🚨',
+                    'major': '⚠️',
+                    'minor': '💡',
+                    'suggestion': '💭'
+                };
+                return icons[severity] || '📝';
             }
             
-            return `<strong>🤖 KQL Expert Here!</strong><br><br>
-            I can help with:<br><br>
-            • <strong>"fake tables"</strong> - Learn what's valid vs invalid<br>
-            • <strong>"optimize query"</strong> - Performance tips<br>
-            • <strong>"syntax help"</strong> - KQL rules and structure<br><br>
-            Current query: ${currentQuery ? 'Ready to analyze!' : 'Paste one first!'}<br><br>
-            💡 Ask me anything specific!`;
+            // Chat functionality
+            openChat() {
+                document.getElementById('chatPanel').style.display = 'flex';
+                document.getElementById('chatToggle').style.display = 'none';
+                console.log('💬 Chat opened');
+            }
+            
+            closeChat() {
+                document.getElementById('chatPanel').style.display = 'none';
+                document.getElementById('chatToggle').style.display = 'flex';
+                console.log('💬 Chat closed');
+            }
+            
+            toggleQuestions() {
+                const questionsList = document.getElementById('questionsList');
+                const toggleIcon = document.getElementById('toggleIcon');
+                
+                if (questionsList.classList.contains('expanded')) {
+                    questionsList.classList.remove('expanded');
+                    toggleIcon.textContent = '▼';
+                } else {
+                    questionsList.classList.add('expanded');
+                    toggleIcon.textContent = '▲';
+                }
+            }
+            
+            askQuickQuestion(question) {
+                // Close questions panel
+                document.getElementById('questionsList').classList.remove('expanded');
+                document.getElementById('toggleIcon').textContent = '▼';
+                
+                // Add to chat
+                this.addMessageToChat(question, 'user');
+                this.respondToQuestion(question);
+            }
+            
+            sendMessage() {
+                const input = document.getElementById('chatInput');
+                const message = input.value.trim();
+                
+                if (!message) return;
+                
+                this.addMessageToChat(message, 'user');
+                input.value = '';
+                
+                this.respondToQuestion(message);
+            }
+            
+            addMessageToChat(message, type) {
+                const chatMessages = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message message-${type}`;
+                messageDiv.innerHTML = type === 'user' ? message : message;
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            respondToQuestion(question) {
+                // Show thinking
+                this.addMessageToChat('<em>🤔 MXDR365 Guardian analyzing...</em>', 'ai');
+                
+                setTimeout(() => {
+                    // Remove thinking message
+                    const messages = document.getElementById('chatMessages');
+                    const lastMessage = messages.lastElementChild;
+                    if (lastMessage && lastMessage.innerHTML.includes('analyzing')) {
+                        lastMessage.remove();
+                    }
+                    
+                    const response = this.generateResponse(question);
+                    this.addMessageToChat(response, 'ai');
+                }, 1000);
+            }
+            
+            generateResponse(question) {
+                const currentQuery = document.getElementById('queryEditor').value.trim();
+                const lowerQuestion = question.toLowerCase();
+                
+                // Auto-fail questions
+                if (lowerQuestion.includes('automatically fail') || lowerQuestion.includes('0 points')) {
+                    return `<strong>🚨 Why Queries Auto-Fail with 0 Points:</strong><br><br>
+                    <strong>❌ Instant Auto-Fail Triggers:</strong><br>
+                    • <strong>Fake table names:</strong> FakeTable, TestTable, DummyTable<br>
+                    • <strong>Made-up fields:</strong> HasOffHoursActivity, WeekendConnections, ThreatLevel<br>
+                    • <strong>Field lists only:</strong> "Activity,Score,Level" without proper KQL<br>
+                    • <strong>SQL syntax:</strong> SELECT * FROM instead of KQL<br>
+                    • <strong>Non-existent tables:</strong> Any table not in Microsoft environments<br><br>
+                    <strong>🎯 Real Examples:</strong><br>
+                    ❌ <code>HasOffHoursActivity,MaxRiskScore,ThreatCategories</code><br>
+                    ✅ <code>SecurityEvent | where EventID == 4624</code><br><br>
+                    <strong>💡 Why This Matters:</strong><br>
+                    • Fake queries teach bad habits and won't work in production<br>
+                    • Enterprise security requires real Microsoft tables only<br>
+                    • Professional KQL must follow proper syntax structure<br><br>
+                    🛡️ <strong>Always start with: SecurityEvent, SigninLogs, DeviceEvents, etc.</strong>`;
+                }
+
+                if (lowerQuestion.includes('advanced window functions')) {
+                    return `<strong>🪟 Advanced Window Functions for Security Analytics:</strong><br><br>
+                    <strong>🎯 Row-Based Window Functions:</strong><br>
+                    <code>// Detect privilege escalation sequences<br>
+                    SecurityEvent<br>
+                    | where TimeGenerated > ago(1d) and EventID == 4672<br>
+                    | sort by Account, TimeGenerated<br>
+                    | extend <br>
+                        PrevEvent = prev(TimeGenerated, 1),<br>
+                        NextEvent = next(TimeGenerated, 1),<br>
+                        TimeBetweenEvents = datetime_diff('second', TimeGenerated, PrevEvent)<br>
+                    | where TimeBetweenEvents < 300  // Rapid privilege use</code><br><br>
+                    💡 <strong>Perfect for detecting attack sequences and behavioral anomalies!</strong>`;
+                }
+
+                if (lowerQuestion.includes('machine learning detection patterns')) {
+                    return `<strong>🤖 Machine Learning Detection Patterns in KQL:</strong><br><br>
+                    <strong>📈 Anomaly Detection with Time Series:</strong><br>
+                    <code>// Detect login anomalies using ML<br>
+                    SecurityEvent<br>
+                    | where EventID == 4624<br>
+                    | make-series LoginCount = count() default=0<br>
+                        on TimeGenerated from ago(30d) to now() step 1h<br>
+                        by Account<br>
+                    | extend Anomalies = series_decompose_anomalies(<br>
+                        LoginCount, 2.0, 7, 'linefit')<br>
+                    | mv-expand TimeGenerated to typeof(datetime),<br>
+                        LoginCount to typeof(long),<br>
+                        Anomalies to typeof(double)<br>
+                    | where Anomalies > 0  // Positive anomalies</code><br><br>
+                    💡 <strong>Combines statistical methods with domain expertise for advanced threat detection!</strong>`;
+                }
+
+                if (lowerQuestion.includes('timegenerated') || lowerQuestion.includes('filter')) {
+                    return `<strong>⏰ TimeGenerated Filters - Critical for Performance:</strong><br><br>
+                    <strong>🔥 Why Essential:</strong><br>
+                    • <strong>Performance:</strong> Without filters, queries scan millions of historical records<br>
+                    • <strong>Cost:</strong> Can reduce query costs by 90%+ <br>
+                    • <strong>Speed:</strong> 10x-100x faster execution<br><br>
+                    <strong>✅ Best Practices:</strong><br>
+                    <code>| where TimeGenerated > ago(7d)</code> - Last 7 days<br>
+                    <code>| where TimeGenerated > ago(1h)</code> - Last hour<br>
+                    <code>| where TimeGenerated between (ago(2d) .. ago(1d))</code> - Specific range<br><br>
+                    <strong>🎯 Required For:</strong><br>
+                    • SecurityEvent (massive volume)<br>
+                    • SigninLogs (continuous data)<br>
+                    • DeviceEvents (high frequency)<br><br>
+                    ${currentQuery && !currentQuery.includes('TimeGenerated') ? '🔴 <strong>Your current query needs TimeGenerated filtering!</strong>' : '✅ <strong>Great! Your query includes time filtering.</strong>'}`;
+                }
+
+                if (lowerQuestion.includes('valid') && lowerQuestion.includes('fake')) {
+                    return `<strong>🛡️ Microsoft Security Tables - Valid vs Fake:</strong><br><br>
+                    <strong>✅ VALID Tables (Use These):</strong><br>
+                    • <strong>SecurityEvent</strong> - Windows security logs & authentication<br>
+                    • <strong>SigninLogs</strong> - Azure AD user sign-ins<br>
+                    • <strong>DeviceEvents</strong> - Endpoint security events<br>
+                    • <strong>AlertInfo</strong> - Security alerts & incidents<br>
+                    • <strong>CommonSecurityLog</strong> - CEF security logs<br>
+                    • <strong>AzureActivity</strong> - Azure management operations<br><br>
+                    <strong>❌ FAKE Examples (Auto-Fail):</strong><br>
+                    • FakeTable, TestTable, DummyTable<br>
+                    • HasOffHoursActivity, WeekendConnections<br>
+                    • ThreatLevel, MaxRiskScore, SuspiciousActivity<br>
+                    • Any made-up field lists without proper KQL<br><br>
+                    💡 <strong>Rule:</strong> Always start with real Microsoft table names!`;
+                }
+
+                if (lowerQuestion.includes('explain') && lowerQuestion.includes('current')) {
+                    if (currentQuery) {
+                        let analysis = `<strong>🔍 Current Query Analysis:</strong><br><br>`;
+                        
+                        const tables = this.extractTableNames(currentQuery);
+                        if (tables.length > 0) {
+                            const validTables = tables.filter(t => this.validTables.has(t));
+                            if (validTables.length > 0) {
+                                analysis += `✅ <strong>Tables:</strong> ${validTables.join(', ')}<br>`;
+                            } else {
+                                analysis += `❌ <strong>Tables:</strong> Invalid table references detected<br>`;
+                            }
+                        }
+                        
+                        if (currentQuery.includes('where TimeGenerated')) {
+                            analysis += `⏰ <strong>Performance:</strong> Includes time filtering ✅<br>`;
+                        } else {
+                            analysis += `⚠️ <strong>Performance:</strong> Missing TimeGenerated filter<br>`;
+                        }
+                        
+                        if (currentQuery.includes('summarize')) {
+                            analysis += `📊 <strong>Analytics:</strong> Data aggregation included<br>`;
+                        }
+                        
+                        analysis += `<br>💡 <strong>Recommendation:</strong> Click "Analyze Query" for detailed scoring!`;
+                        return analysis;
+                    } else {
+                        return `<strong>📝 No Query to Analyze</strong><br><br>
+                        Please enter a KQL query in the editor first, then I'll explain its structure and logic!<br><br>
+                        🎯 I'll break down every aspect for you!`;
+                    }
+                }
+                
+                // Default response
+                return `<strong>🛡️ MXDR365 KQL Guardian Ready!</strong><br><br>
+                I'm your expert KQL assistant with deep knowledge of Microsoft security analytics. You can ask me about:<br><br>
+                🎯 <strong>Table Validation:</strong> Valid vs fake tables<br>
+                ⚡ <strong>Performance:</strong> Optimization and speed<br>
+                📝 <strong>Syntax:</strong> KQL rules and structure<br>
+                🔗 <strong>Operations:</strong> Joins, unions, aggregations<br>
+                🛡️ <strong>Security:</strong> EventIDs and threat hunting<br>
+                📊 <strong>Analytics:</strong> Statistical analysis and anomaly detection<br><br>
+                💡 <strong>Try asking:</strong> "${question}" or click the quick questions above!<br><br>
+                🔥 <strong>Your query:</strong> ${currentQuery ? 'Ready to analyze!' : 'Paste one to get started!'}`;
+            }
+            
+            showAlert(message) {
+                alert(message);
+            }
         }
+        
+        // Initialize MXDR365 on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Initializing MXDR365 Analysis Engine...');
+            window.mxdr365 = new MXDR365Analyzer();
+            console.log('✅ MXDR365 ready for professional KQL analysis!');
+        });
     </script>
 </body>
 </html>
