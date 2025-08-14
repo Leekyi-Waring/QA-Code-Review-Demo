@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Code QA Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 24px;
+            overflow-y: auto;
+            border-right: 1px solid #2a2a3e;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #8b8ba7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #2a2a3e;
+        }
+
+        .header-title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid #2a2a3e;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .analysis-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+            height: calc(100vh - 200px);
+        }
+
+        .code-panel {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .code-editor {
+            width: 100%;
+            height: 400px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            color: #e6edf3;
+            resize: none;
+            outline: none;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .lang-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #2a2a3e;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+        }
+
+        .lang-chip.active {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #000;
+            border-color: #00d4ff;
+        }
+
+        .analysis-panel {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #2a2a3e;
+            overflow-y: auto;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #8b8ba7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .issues-list {
+            margin-top: 24px;
+        }
+
+        .issue-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+        }
+
+        .issue-critical { border-left-color: #ff4757; }
+        .issue-high { border-left-color: #ff6b35; }
+        .issue-medium { border-left-color: #ffa726; }
+        .issue-low { border-left-color: #66bb6a; }
+        .issue-info { border-left-color: #42a5f5; }
+
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .issue-title {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .issue-severity {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-critical { background: #ff4757; color: #fff; }
+        .severity-high { background: #ff6b35; color: #fff; }
+        .severity-medium { background: #ffa726; color: #000; }
+        .severity-low { background: #66bb6a; color: #000; }
+        .severity-info { background: #42a5f5; color: #fff; }
+
+        .issue-description {
+            color: #b3b3b3;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .issue-suggestion {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 0.8rem;
+            color: #00d4ff;
+        }
+
+        .code-snippet {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 8px 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: #e6edf3;
+            overflow-x: auto;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 16px;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            background: #1a1a2e;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid #2a2a3e;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #2a2a3e;
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #2a2a3e;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .team-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .export-btn {
+            background: rgba(102, 187, 106, 0.2);
+            border: 1px solid #66bb6a;
+            color: #66bb6a;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .export-btn:hover {
+            background: rgba(102, 187, 106, 0.3);
+        }
+
+        @media (max-width: 1200px) {
+            .analysis-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            🔍 CodeQL Pro
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-title">Analysis</div>
+            <div class="nav-item active">
+                <span>📊</span> Code Quality
+            </div>
+            <div class="nav-item">
+                <span>🔒</span> Security Scan
+            </div>
+            <div class="nav-item">
+                <span>⚡</span> Performance
+            </div>
+            <div class="nav-item">
+                <span>📋</span> Standards
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-title">Team</div>
+            <div class="nav-item">
+                <span>📈</span> Reports
+            </div>
+            <div class="nav-item">
+                <span>👥</span> Team Stats
+            </div>
+            <div class="nav-item">
+                <span>⚙️</span> Settings
+            </div>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-title">Integration</div>
+            <div class="nav-item">
+                <span>🔗</span> Git Hooks
+            </div>
+            <div class="nav-item">
+                <span>🚀</span> CI/CD
+            </div>
+            <div class="nav-item">
+                <span>📦</span> Packages
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1 class="header-title">Code Quality Analysis</h1>
+                <p style="color: #8b8ba7; margin-top: 8px;">Enterprise-grade code review and quality assurance</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="importBtn">📁 Import Project</button>
+                <button class="btn btn-primary" id="exportBtn">📤 Export Report</button>
+            </div>
+        </div>
+
+        <div class="analysis-container">
+            <div class="code-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">Code Input</h3>
+                </div>
+                
+                <textarea id="codeEditor" class="code-editor" placeholder="// Paste your code here for analysis...
+function calculateTotal(items) {
+    let total = 0;
+    for (let i = 0; i < items.length; i++) {
+        total += items[i].price * items[i].quantity;
+    }
+    return total;
+}
+
+// Example usage
+const cartItems = [
+    { price: 10.99, quantity: 2 },
+    { price: 25.50, quantity: 1 }
+];
+
+console.log('Total:', calculateTotal(cartItems));"></textarea>
+
+                <div class="language-selector">
+                    <div class="lang-chip active" data-lang="javascript">JavaScript</div>
+                    <div class="lang-chip" data-lang="typescript">TypeScript</div>
+                    <div class="lang-chip" data-lang="python">Python</div>
+                    <div class="lang-chip" data-lang="java">Java</div>
+                    <div class="lang-chip" data-lang="csharp">C#</div>
+                    <div class="lang-chip" data-lang="php">PHP</div>
+                    <div class="lang-chip" data-lang="go">Go</div>
+                    <div class="lang-chip" data-lang="rust">Rust</div>
+                </div>
+
+                <button id="analyzeBtn" class="analyze-btn">
+                    🔍 Run Comprehensive Analysis
+                </button>
+            </div>
+
+            <div class="analysis-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">Analysis Results</h3>
+                    <button class="export-btn" id="exportResultsBtn">Export</button>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="qualityScore">--</div>
+                        <div class="metric-label">Quality Score</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="issuesCount">--</div>
+                        <div class="metric-label">Issues Found</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="complexity">--</div>
+                        <div class="metric-label">Complexity</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="coverage">--</div>
+                        <div class="metric-label">Test Coverage</div>
+                    </div>
+                </div>
+
+                <div class="issues-list" id="issuesList">
+                    <div style="text-align: center; color: #8b8ba7; padding: 40px;">
+                        Run analysis to see detailed results
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="team-features">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h4>Team Analytics</h4>
+                <p style="color: #8b8ba7; font-size: 0.9rem; margin-top: 8px;">
+                    Track code quality trends across your team with detailed metrics and historical data.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h4>CI/CD Integration</h4>
+                <p style="color: #8b8ba7; font-size: 0.9rem; margin-top: 8px;">
+                    Automatically run quality checks on every commit and pull request.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h4>Custom Rules</h4>
+                <p style="color: #8b8ba7; font-size: 0.9rem; margin-top: 8px;">
+                    Define your own coding standards and enforce them across all projects.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3 style="color: #00d4ff; margin-bottom: 8px;">Analyzing Code Quality</h3>
+            <p style="color: #8b8ba7;" id="loadingStatus">Initializing analysis...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class EnterpriseCodeAnalyzer {
+            constructor() {
+                this.currentLanguage = 'javascript';
+                this.analysisRules = this.initializeAnalysisRules();
+                this.securityPatterns = this.initializeSecurityPatterns();
+                this.performancePatterns = this.initializePerformancePatterns();
+                
+                this.initializeEventListeners();
+                this.initializeLanguageDetection();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('analyzeBtn').addEventListener('click', () => this.runAnalysis());
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportFullReport());
+                document.getElementById('exportResultsBtn').addEventListener('click', () => this.exportResults());
+                document.getElementById('importBtn').addEventListener('click', () => this.importProject());
+                
+                // Language selector
+                document.querySelectorAll('.lang-chip').forEach(chip => {
+                    chip.addEventListener('click', (e) => {
+                        document.querySelectorAll('.lang-chip').forEach(c => c.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentLanguage = e.target.dataset.lang;
+                    });
+                });
+
+                // Auto-save and real-time hints
+                document.getElementById('codeEditor').addEventListener('input', 
+                    this.debounce(() => this.provideLiveHints(), 1000)
+                );
+            }
+
+            initializeAnalysisRules() {
+                return {
+                    javascript: [
+                        {
+                            pattern: /eval\s*\(/g,
+                            severity: 'critical',
+                            category: 'Security',
+                            title: 'Code Injection Vulnerability',
+                            description: 'eval() can execute arbitrary code and is a major security risk.',
+                            suggestion: 'Use JSON.parse() for data parsing or safer alternatives.',
+                            cwe: 'CWE-94'
+                        },
+                        {
+                            pattern: /innerHTML\s*=/g,
+                            severity: 'high',
+                            category: 'Security',
+                            title: 'XSS Vulnerability',
+                            description: 'innerHTML can lead to cross-site scripting attacks.',
+                            suggestion: 'Use textContent or safely sanitize HTML content.',
+                            cwe: 'CWE-79'
+                        },
+                        {
+                            pattern: /for\s*\([^}]*\.length[^}]*\)/g,
+                            severity: 'medium',
+                            category: 'Performance',
+                            title: 'Inefficient Loop',
+                            description: 'Accessing .length property in loop condition impacts performance.',
+                            suggestion: 'Cache the length value before the loop.',
+                            impact: 'O(n) to O(1) access improvement'
+                        },
+                        {
+                            pattern: /var\s+/g,
+                            severity: 'low',
+                            category: 'Modern Standards',
+                            title: 'Legacy Variable Declaration',
+                            description: 'var has function scope and can lead to unexpected behavior.',
+                            suggestion: 'Use const for immutable values, let for variables.',
+                            standard: 'ES6+'
+                        },
+                        {
+                            pattern: /console\.log\(/g,
+                            severity: 'info',
+                            category: 'Production Readiness',
+                            title: 'Debug Code Detected',
+                            description: 'Console statements should be removed from production code.',
+                            suggestion: 'Use proper logging framework or remove debug statements.',
+                            impact: 'Production cleanliness'
+                        }
+                    ],
+                    python: [
+                        {
+                            pattern: /exec\s*\(/g,
+                            severity: 'critical',
+                            category: 'Security',
+                            title: 'Code Execution Risk',
+                            description: 'exec() can execute arbitrary Python code.',
+                            suggestion: 'Use safer alternatives or input validation.',
+                            cwe: 'CWE-94'
+                        },
+                        {
+                            pattern: /except:\s*$/gm,
+                            severity: 'high',
+                            category: 'Error Handling',
+                            title: 'Bare Except Clause',
+                            description: 'Catching all exceptions can hide important errors.',
+                            suggestion: 'Specify exception types: except ValueError:',
+                            standard: 'PEP 8'
+                        }
+                    ]
+                };
+            }
+
+            initializeSecurityPatterns() {
+                return [
+                    { pattern: /password\s*=\s*["'][^"']*["']/gi, severity: 'critical', title: 'Hardcoded Password' },
+                    { pattern: /api[_-]?key\s*=\s*["'][^"']*["']/gi, severity: 'critical', title: 'Hardcoded API Key' },
+                    { pattern: /secret\s*=\s*["'][^"']*["']/gi, severity: 'high', title: 'Hardcoded Secret' },
+                    { pattern: /sql.*select.*from/gi, severity: 'medium', title: 'Potential SQL Injection' }
+                ];
+            }
+
+            initializePerformancePatterns() {
+                return [
+                    { pattern: /\+\s*=.*string/gi, severity: 'medium', title: 'String Concatenation in Loop' },
+                    { pattern: /nested.*loop/gi, severity: 'high', title: 'Nested Loop Complexity' },
+                    { pattern: /recursive.*without.*base/gi, severity: 'high', title: 'Potential Infinite Recursion' }
+                ];
+            }
+
+            initializeLanguageDetection() {
+                const patterns = {
+                    javascript: [/function\s+\w+/, /const\s+\w+/, /=>\s*{/, /console\.log/],
+                    python: [/def\s+\w+/, /import\s+\w+/, /print\s*\(/, /__init__/],
+                    java: [/public\s+class/, /System\.out\.println/, /public\s+static\s+void/],
+                    csharp: [/using\s+System/, /public\s+class/, /Console\.WriteLine/],
+                    php: [/<\?php/, /echo\s+/, /\$\w+\s*=/],
+                    go: [/func\s+\w+/, /package\s+\w+/, /fmt\.Print/],
+                    rust: [/fn\s+\w+/, /let\s+mut/, /println!/]
+                };
+
+                this.languagePatterns = patterns;
+            }
+
+            async runAnalysis() {
+                const code = document.getElementById('codeEditor').value.trim();
+                
+                if (!code) {
+                    alert('Please enter code to analyze.');
+                    return;
+                }
+
+                this.showLoadingOverlay();
+                
+                try {
+                    // Simulate comprehensive analysis with progress updates
+                    await this.performComprehensiveAnalysis(code);
+                } catch (error) {
+                    console.error('Analysis failed:', error);
+                    alert('Analysis failed. Please try again.');
+                } finally {
+                    this.hideLoadingOverlay();
+                }
+            }
+
+            async performComprehensiveAnalysis(code) {
+                const steps = [
+                    { name: 'Lexical Analysis', duration: 500 },
+                    { name: 'Security Scanning', duration: 800 },
+                    { name: 'Performance Analysis', duration: 600 },
+                    { name: 'Code Quality Check', duration: 700 },
+                    { name: 'Standards Compliance', duration: 400 },
+                    { name: 'Generating Report', duration: 300 }
+                ];
+
+                let progress = 0;
+                const progressFill = document.getElementById('progressFill');
+                const loadingStatus = document.getElementById('loadingStatus');
+
+                for (const step of steps) {
+                    loadingStatus.textContent = step.name + '...';
+                    await this.delay(step.duration);
+                    progress += 100 / steps.length;
+                    progressFill.style.width = progress + '%';
+                }
+
+                // Perform actual analysis
+                const analysis = this.analyzeCode(code);
+                this.displayResults(analysis);
+            }
+
+            analyzeCode(code) {
+                const issues = [];
+                let qualityScore = 100;
+                
+                // Detect language if not manually set
+                const detectedLang = this.detectLanguage(code);
+                if (detectedLang && detectedLang !== this.currentLanguage) {
+                    this.currentLanguage = detectedLang;
+                    this.updateLanguageSelector(detectedLang);
+                }
+
+                // Security Analysis
+                this.securityPatterns.forEach(pattern => {
+                    const matches = code.match(pattern.pattern);
+                    if (matches) {
+                        issues.push({
+                            severity: pattern.severity,
+                            category: 'Security',
+                            title: pattern.title,
+                            description: `Found ${matches.length} instance(s) of potential security vulnerability.`,
+                            suggestion: 'Review and remediate security issues immediately.',
+                            line: this.findLineNumber(code, matches[0]),
+                            cwe: pattern.cwe || 'Security Risk'
+                        });
+                        qualityScore -= pattern.severity === 'critical' ? 25 : pattern.severity === 'high' ? 15 : 10;
+                    }
+                });
+
+                // Language-specific analysis
+                const rules = this.analysisRules[this.currentLanguage] || [];
+                rules.forEach(rule => {
+                    const matches = code.match(rule.pattern);
+                    if (matches) {
+                        issues.push({
+                            severity: rule.severity,
+                            category: rule.category,
+                            title: rule.title,
+                            description: rule.description,
+                            suggestion: rule.suggestion,
+                            line: this.findLineNumber(code, matches[0]),
+                            standard: rule.standard,
+                            cwe: rule.cwe,
+                            impact: rule.impact
+                        });
+                        
+                        const scoreDeduction = {
+                            'critical': 20,
+                            'high': 15,
+                            'medium': 8,
+                            'low': 3,
+                            'info': 1
+                        };
+                        qualityScore -= scoreDeduction[rule.severity] || 5;
+                    }
+                });
+
+                // Complexity Analysis
+                const complexity = this.calculateComplexity(code);
+                const coverage = this.estimateTestCoverage(code);
+
+                return {
+                    qualityScore: Math.max(qualityScore, 0),
+                    issues: issues.sort((a, b) => this.getSeverityWeight(b.severity) - this.getSeverityWeight(a.severity)),
+                    metrics: {
+                        linesOfCode: code.split('\n').length,
+                        complexity: complexity,
+                        coverage: coverage,
+                        maintainabilityIndex: Math.floor(qualityScore * 0.8)
+                    },
+                    language: this.currentLanguage,
+                    timestamp: new Date().toISOString()
+                };
+            }
+
+            detectLanguage(code) {
+                let maxScore = 0;
+                let detectedLang = 'javascript';
+
+                Object.entries(this.languagePatterns).forEach(([lang, patterns]) => {
+                    let score = 0;
+                    patterns.forEach(pattern => {
+                        if (pattern.test(code)) score++;
+                    });
+                    if (score > maxScore) {
+                        maxScore = score;
+                        detectedLang = lang;
+                    }
+                });
+
+                return maxScore > 0 ? detectedLang : 'javascript';
+            }
+
+            calculateComplexity(code) {
+                // Simplified cyclomatic complexity
+                const controlFlowKeywords = [/if\s*\(/, /else/, /for\s*\(/, /while\s*\(/, /switch\s*\(/, /catch\s*\(/];
+                let complexity = 1; // Base complexity
+
+                controlFlowKeywords.forEach(pattern => {
+                    const matches = code.match(new RegExp(pattern.source, 'g'));
+                    if (matches) complexity += matches.length;
+                });
+
+                return Math.min(complexity, 50); // Cap at 50 for display
+            }
+
+            estimateTestCoverage(code) {
+                // Estimate based on test patterns
+                const testPatterns = [/test\s*\(/, /it\s*\(/, /describe\s*\(/, /assert/, /expect\s*\(/];
+                let testIndicators = 0;
+
+                testPatterns.forEach(pattern => {
+                    if (pattern.test(code)) testIndicators++;
+                });
+
+                // Rough estimation
+                return Math.min(testIndicators * 20, 100);
+            }
+
+            findLineNumber(code, searchStr) {
+                const lines = code.split('\n');
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].includes(searchStr)) {
+                        return i + 1;
+                    }
+                }
+                return 1;
+            }
+
+            getSeverityWeight(severity) {
+                const weights = { 'critical': 5, 'high': 4, 'medium': 3, 'low': 2, 'info': 1 };
+                return weights[severity] || 0;
+            }
+
+            displayResults(analysis) {
+                // Update metrics
+                document.getElementById('qualityScore').textContent = analysis.qualityScore;
+                document.getElementById('issuesCount').textContent = analysis.issues.length;
+                document.getElementById('complexity').textContent = analysis.metrics.complexity;
+                document.getElementById('coverage').textContent = analysis.metrics.coverage + '%';
+
+                // Display issues
+                const issuesList = document.getElementById('issuesList');
+                issuesList.innerHTML = '';
+
+                if (analysis.issues.length === 0) {
+                    issuesList.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #66bb6a;">
+                            <div style="font-size: 3rem; margin-bottom: 16px;">✅</div>
+                            <h3>Excellent Code Quality!</h3>
+                            <p style="color: #8b8ba7; margin-top: 8px;">No issues found in your code.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                analysis.issues.forEach(issue => {
+                    const issueElement = this.createIssueElement(issue);
+                    issuesList.appendChild(issueElement);
+                });
+
+                // Store analysis for export
+                this.lastAnalysis = analysis;
+            }
+
+            createIssueElement(issue) {
+                const div = document.createElement('div');
+                div.className = `issue-item issue-${issue.severity}`;
+                
+                const severityEmoji = {
+                    'critical': '🚨',
+                    'high': '⚠️',
+                    'medium': '⚡',
+                    'low': '💡',
+                    'info': 'ℹ️'
+                };
+
+                div.innerHTML = `
+                    <div class="issue-header">
+                        <div class="issue-title">${severityEmoji[issue.severity]} ${issue.title}</div>
+                        <div class="issue-severity severity-${issue.severity}">${issue.severity}</div>
+                    </div>
+                    <div class="issue-description">${issue.description}</div>
+                    <div class="issue-suggestion">
+                        <strong>💡 Suggestion:</strong> ${issue.suggestion}
+                        ${issue.line ? `<br><small>📍 Line: ${issue.line}</small>` : ''}
+                        ${issue.cwe ? `<br><small>🔗 Reference: ${issue.cwe}</small>` : ''}
+                        ${issue.standard ? `<br><small>📋 Standard: ${issue.standard}</small>` : ''}
+                    </div>
+                `;
+
+                return div;
+            }
+
+            updateLanguageSelector(language) {
+                document.querySelectorAll('.lang-chip').forEach(chip => {
+                    chip.classList.remove('active');
+                    if (chip.dataset.lang === language) {
+                        chip.classList.add('active');
+                    }
+                });
+            }
+
+            provideLiveHints() {
+                // Real-time analysis hints (simplified)
+                const code = document.getElementById('codeEditor').value;
+                // Implementation for live hints would go here
+            }
+
+            showLoadingOverlay() {
+                document.getElementById('loadingOverlay').style.display = 'flex';
+                document.getElementById('progressFill').style.width = '0%';
+            }
+
+            hideLoadingOverlay() {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+
+            exportResults() {
+                if (!this.lastAnalysis) {
+                    alert('No analysis results to export. Please run an analysis first.');
+                    return;
+                }
+
+                const reportData = {
+                    timestamp: new Date().toISOString(),
+                    analysis: this.lastAnalysis,
+                    metadata: {
+                        platform: 'CodeQL Pro',
+                        version: '2.0.0',
+                        analyst: 'Enterprise QA System'
+                    }
+                };
+
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `code-analysis-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            exportFullReport() {
+                if (!this.lastAnalysis) {
+                    alert('No analysis results to export. Please run an analysis first.');
+                    return;
+                }
+
+                // Generate comprehensive PDF-style report
+                const report = this.generateComprehensiveReport(this.lastAnalysis);
+                
+                const blob = new Blob([report], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `comprehensive-report-${Date.now()}.html`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            generateComprehensiveReport(analysis) {
+                return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Code Quality Analysis Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; }
+                        .header { text-align: center; margin-bottom: 40px; }
+                        .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
+                        .metric { text-align: center; padding: 20px; background: #f5f5f5; border-radius: 8px; }
+                        .issue { margin-bottom: 20px; padding: 15px; border-left: 4px solid #ccc; }
+                        .critical { border-left-color: #ff4757; }
+                        .high { border-left-color: #ff6b35; }
+                        .medium { border-left-color: #ffa726; }
+                        .low { border-left-color: #66bb6a; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Code Quality Analysis Report</h1>
+                        <p>Generated on ${new Date().toLocaleString()}</p>
+                        <p>Language: ${analysis.language.toUpperCase()}</p>
+                    </div>
+                    
+                    <div class="metrics">
+                        <div class="metric">
+                            <h3>${analysis.qualityScore}</h3>
+                            <p>Quality Score</p>
+                        </div>
+                        <div class="metric">
+                            <h3>${analysis.issues.length}</h3>
+                            <p>Issues Found</p>
+                        </div>
+                        <div class="metric">
+                            <h3>${analysis.metrics.complexity}</h3>
+                            <p>Complexity</p>
+                        </div>
+                        <div class="metric">
+                            <h3>${analysis.metrics.coverage}%</h3>
+                            <p>Test Coverage</p>
+                        </div>
+                    </div>
+
+                    <h2>Issues Breakdown</h2>
+                    ${analysis.issues.map(issue => `
+                        <div class="issue ${issue.severity}">
+                            <h4>${issue.title} (${issue.severity.toUpperCase()})</h4>
+                            <p><strong>Category:</strong> ${issue.category}</p>
+                            <p><strong>Description:</strong> ${issue.description}</p>
+                            <p><strong>Suggestion:</strong> ${issue.suggestion}</p>
+                            ${issue.line ? `<p><strong>Line:</strong> ${issue.line}</p>` : ''}
+                        </div>
+                    `).join('')}
+                </body>
+                </html>
+                `;
+            }
+
+            importProject() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.multiple = true;
+                input.accept = '.js,.ts,.py,.java,.cs,.php,.go,.rs,.cpp,.c';
+                
+                input.onchange = (e) => {
+                    const files = Array.from(e.target.files);
+                    if (files.length > 0) {
+                        this.processProjectFiles(files);
+                    }
+                };
+                
+                input.click();
+            }
+
+            async processProjectFiles(files) {
+                let combinedCode = '';
+                let fileCount = 0;
+
+                for (const file of files.slice(0, 10)) { // Limit to 10 files
+                    const content = await this.readFileContent(file);
+                    combinedCode += `\n\n// === ${file.name} ===\n${content}`;
+                    fileCount++;
+                }
+
+                document.getElementById('codeEditor').value = combinedCode;
+                alert(`Imported ${fileCount} files. Ready for analysis.`);
+            }
+
+            readFileContent(file) {
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsText(file);
+                });
+            }
+
+            debounce(func, delay) {
+                let timeoutId;
+                return (...args) => {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Initialize the analyzer
+        document.addEventListener('DOMContentLoaded', () => {
+            new EnterpriseCodeAnalyzer();
+        });
+    </script>
+</body>
+</html>
