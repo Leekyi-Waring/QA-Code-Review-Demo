@@ -665,177 +665,258 @@ SecurityEvent
                     'W3CIISLog', 'Wire', 'WireData', 'ServiceFabricOperationalEvent', 'ServiceMapComputer_CL'
                 ]);
 
-                // Comprehensive KQL operators and functions
-                this.validOperators = new Set([
-                    'where', 'project', 'extend', 'summarize', 'order', 'sort', 'top', 'limit', 'take',
-                    'join', 'union', 'let', 'datatable', 'range', 'print', 'evaluate', 'invoke',
-                    'distinct', 'sample', 'count', 'dcount', 'countif', 'dcountif', 'sum', 'avg',
-                    'min', 'max', 'any', 'make_list', 'make_set', 'percentile', 'stdev', 'variance',
-                    'arg_max', 'arg_min', 'has', 'has_any', 'contains', 'contains_cs', 'startswith',
-                    'endswith', 'matches', 'in', 'between', 'ago', 'now', 'bin', 'floor', 'ceiling',
-                    'round', 'abs', 'parse', 'extract', 'split', 'strcat', 'strlen', 'substring',
-                    'tolower', 'toupper', 'trim', 'replace', 'isempty', 'isnotempty', 'isnull',
-                    'isnotnull', 'todynamic', 'tostring', 'toint', 'tolong', 'toreal', 'todatetime',
-                    'mv-expand', 'mv-apply', 'materialize', 'fork', 'facet'
+                // Time-series tables that require datetime filtering
+                this.timeSeriesIndicators = new Set([
+                    'SecurityEvent', 'Event', 'Syslog', 'Perf', 'Heartbeat',
+                    'AuditLogs', 'SigninLogs', 'DeviceEvents', 'WindowsEvent',
+                    'DeviceProcessEvents', 'DeviceNetworkEvents', 'DeviceFileEvents',
+                    'CommonSecurityLog', 'AzureActivity', 'OfficeActivity'
                 ]);
 
-                this.analysisRules = {
-                    validation: [
-                        {
-                            test: (query) => this.validateTableNames(query),
-                            severity: 'critical',
-                            title: 'Invalid Table References',
-                            category: 'Table Validation',
-                            scoreImpact: -4.0
-                        },
-                        {
-                            test: (query) => this.validateBasicStructure(query),
-                            severity: 'critical', 
-                            title: 'Invalid Query Structure',
-                            category: 'Syntax Validation',
-                            scoreImpact: -3.5
-                        },
-                        {
-                            test: (query) => this.validateOperators(query),
-                            severity: 'major',
-                            title: 'Invalid KQL Operators',
-                            category: 'Operator Validation',
-                            scoreImpact: -2.5
-                        },
-                        {
-                            test: (query) => this.validateMeaningfulness(query),
-                            severity: 'major',
-                            title: 'Query Analysis Deficiency',
-                            category: 'Analytical Value',
-                            scoreImpact: -2.0
-                        }
+                // Auto-fail patterns - immediate 0 score
+                this.autoFailPatterns = {
+                    syntax: [
+                        /[^|]\s*\|\s*[^|].*[^|]\s*\|\s*[^|]/g, // Missing pipes
+                        /['""][^'""]*$/g, // Unclosed quotes
+                        /\([^)]*$/g, // Unclosed parentheses
+                        /==\s*['"]\d+['"]/g // Numeric comparison with quotes
                     ],
                     performance: [
-                        {
-                            test: (query) => !query.match(/TimeGenerated\s*[><=]+\s*ago\([^)]+\)/gi),
-                            severity: 'critical',
-                            title: 'Missing Time Boundaries',
-                            description: 'Query lacks time filtering, which will scan entire table history causing severe performance degradation.',
-                            fix: 'Add time filter: | where TimeGenerated > ago(7d)',
-                            category: 'Time Filtering',
-                            scoreImpact: -3.0
-                        },
-                        {
-                            pattern: /\|\s*project\s+\*/gi,
-                            severity: 'major',
-                            title: 'Wildcard Column Projection',
-                            description: 'Selecting all columns (*) increases data transfer overhead and processing costs.',
-                            fix: 'Specify exact columns: | project TimeGenerated, Computer, Account',
-                            category: 'Column Selection',
-                            scoreImpact: -1.5
-                        },
-                        {
-                            pattern: /\|\s*extend.*\|\s*where/gi,
-                            severity: 'major',
-                            title: 'Compute Before Filter Pattern',
-                            description: 'Computing extended columns before filtering wastes resources on data that will be discarded.',
-                            fix: 'Move where clauses before extend operations',
-                            category: 'Operation Ordering',
-                            scoreImpact: -1.2
-                        },
-                        {
-                            pattern: /\|\s*order\s+by.*\|\s*take/gi,
-                            severity: 'minor',
-                            title: 'Sort Before Limit Anti-Pattern',
-                            description: 'ORDER BY followed by TAKE forces full dataset sorting before limiting.',
-                            fix: 'Use | top N by Column [desc] for better performance',
-                            category: 'Sorting Optimization',
-                            scoreImpact: -0.8
-                        },
-                        {
-                            pattern: /contains\s+".*\*.*"/gi,
-                            severity: 'minor',
-                            title: 'Inefficient Wildcard Search',
-                            description: 'Wildcard searches with contains are less efficient than specific operators.',
-                            fix: 'Use has, startswith, or endswith for better performance',
-                            category: 'String Operations',
-                            scoreImpact: -0.5
-                        }
-                    ],
-                    syntax: [
-                        {
-                            pattern: /\b(WHERE|SUMMARIZE|PROJECT|EXTEND|JOIN|UNION)\b/g,
-                            severity: 'minor',
-                            title: 'Operator Case Inconsistency',
-                            description: 'KQL operators should be lowercase for consistency.',
-                            fix: 'Use lowercase: where, summarize, project, extend, join, union',
-                            category: 'Code Style',
-                            scoreImpact: -0.3
-                        },
-                        {
-                            pattern: /\|\s*\|/g,
-                            severity: 'critical',
-                            title: 'Syntax Error: Consecutive Pipes',
-                            description: 'Consecutive pipe operators will cause query execution failure.',
-                            fix: 'Remove duplicate pipe operators',
-                            category: 'Syntax Error',
-                            scoreImpact: -2.5
-                        },
-                        {
-                            pattern: /;(?=\s*$)/gm,
-                            severity: 'minor',
-                            title: 'Unnecessary Semicolons',
-                            description: 'KQL does not require semicolons at statement end.',
-                            fix: 'Remove trailing semicolons',
-                            category: 'Code Style',
-                            scoreImpact: -0.2
-                        }
+                        /^\s*\w+\s*\|\s*search\s+/g, // search as first operation
+                        /\|\s*project\s+\*/g, // project * (select all)
+                        /\|\s*join\s+.*\|\s*where.*TimeGenerated/g, // where after join
+                        /union\s+\*/g // union all tables
                     ],
                     security: [
-                        {
-                            pattern: /\|\s*project.*(?:password|secret|key|token|credential|ssn|social)/gi,
-                            severity: 'critical',
-                            title: 'Sensitive Data Exposure Risk',
-                            description: 'Query may expose sensitive data fields in results.',
-                            fix: 'Remove sensitive columns or use data masking functions',
-                            category: 'Data Protection',
-                            scoreImpact: -2.0
-                        },
-                        {
-                            pattern: /union\s+(?:\w+\s*,\s*){4,}/gi,
-                            severity: 'minor',
-                            title: 'Multiple Table Union Complexity',
-                            description: 'Unioning many tables may mix different data classification levels.',
-                            fix: 'Ensure all tables have compatible data classifications',
-                            category: 'Data Governance',
-                            scoreImpact: -0.5
-                        }
-                    ],
-                    bestPractices: [
-                        {
-                            test: (query) => !query.includes('//') && query.length > 150,
-                            severity: 'suggestion',
-                            title: 'Documentation Deficiency',
-                            description: 'Complex queries benefit from comments explaining methodology.',
-                            fix: 'Add comments: // Purpose: Analyze login patterns for anomalies',
-                            category: 'Documentation',
-                            scoreImpact: -0.7
-                        },
-                        {
-                            pattern: /SecurityEvent.*EventID.*(?:4624|4625|4688|4672)/gi,
-                            severity: 'good',
-                            title: 'Security Event Analysis Focus',
-                            description: 'Query effectively targets high-value security events.',
-                            fix: 'Excellent focus on authentication and privilege events',
-                            category: 'Security Analysis',
-                            scoreImpact: +0.5
-                        },
-                        {
-                            pattern: /let\s+\w+\s*=/gi,
-                            severity: 'good',
-                            title: 'Variable Usage Excellence',
-                            description: 'Proper use of variables improves maintainability.',
-                            fix: 'Excellent practice for reusable queries',
-                            category: 'Code Organization',
-                            scoreImpact: +0.8
-                        }
+                        /let\s+\w+\s*=\s*['"]\$\{.*\}['"]/g, // Dynamic query construction
+                        /password['"]\s*:\s*['"]\w+/g, // Hardcoded passwords
+                        /secret['"]\s*:\s*['"]\w+/g, // Hardcoded secrets
+                        /evaluate\s+.*query\(/g // Dynamic query execution
                     ]
                 };
+
+                // Comprehensive scoring patterns (1000 point system)
+                this.scoringPatterns = {
+                    syntax: {
+                        maxPoints: 150,
+                        rules: [
+                            {
+                                pattern: /\b(WHERE|PROJECT|SUMMARIZE|EXTEND|JOIN|UNION|ORDER|TOP|DISTINCT|TAKE|LIMIT)\b/g,
+                                points: -10,
+                                title: 'Incorrect Operator Casing',
+                                description: 'KQL operators should be lowercase',
+                                severity: 'minor'
+                            },
+                            {
+                                pattern: /SELECT\s+/g,
+                                points: -25,
+                                title: 'SQL Syntax in KQL',
+                                description: 'Using SQL SELECT instead of KQL project',
+                                severity: 'major'
+                            },
+                            {
+                                pattern: /\s+\|\s*$/g,
+                                points: -15,
+                                title: 'Trailing Pipe Operator',
+                                description: 'Query ends with unnecessary pipe',
+                                severity: 'minor'
+                            },
+                            {
+                                pattern: /^\s*\|/g,
+                                points: -15,
+                                title: 'Leading Pipe Operator',
+                                description: 'Query starts with pipe operator',
+                                severity: 'minor'
+                            }
+                        ]
+                    },
+                    performance: {
+                        maxPoints: 300,
+                        rules: [
+                            {
+                                test: (query) => this.checkTimeFilterRequirement(query),
+                                points: -100,
+                                title: 'Missing Required DateTime Filter',
+                                description: 'Time-series data queries must include TimeGenerated filter',
+                                severity: 'critical'
+                            },
+                            {
+                                pattern: /\|\s*where\s+.*\|\s*summarize.*\|\s*where/g,
+                                points: -100,
+                                title: 'Filter After Summarize Anti-Pattern',
+                                description: 'Filtering after aggregation wastes resources',
+                                severity: 'major'
+                            },
+                            {
+                                pattern: /join\s+kind=fullouter/g,
+                                points: -100,
+                                title: 'Full Outer Join Performance Issue',
+                                description: 'Full outer joins are usually incorrect and expensive',
+                                severity: 'major'
+                            },
+                            {
+                                pattern: /\|\s*extend.*\|\s*where/g,
+                                points: -50,
+                                title: 'Compute Before Filter Pattern',
+                                description: 'Computing before filtering wastes resources',
+                                severity: 'major'
+                            },
+                            {
+                                pattern: /\|\s*order\s+by.*\|\s*take/g,
+                                points: -30,
+                                title: 'Sort Before Limit Anti-Pattern',
+                                description: 'Use top N instead of order by + take',
+                                severity: 'minor'
+                            },
+                            {
+                                pattern: /join\s+(?!kind=)/g,
+                                points: -50,
+                                title: 'Missing Join Kind Specification',
+                                description: 'Always specify join kind for clarity and performance',
+                                severity: 'major'
+                            }
+                        ]
+                    },
+                    security: {
+                        maxPoints: 200,
+                        rules: [
+                            {
+                                pattern: /project.*(?:password|secret|token|credential|ssn|social)/gi,
+                                points: -100,
+                                title: 'Sensitive Data Exposure Risk',
+                                description: 'Query may expose sensitive data fields',
+                                severity: 'critical'
+                            },
+                            {
+                                pattern: /search\s+['"]\*['"]/g,
+                                points: -100,
+                                title: 'Overly Broad Search Pattern',
+                                description: 'Wildcard search patterns are security risks',
+                                severity: 'major'
+                            },
+                            {
+                                pattern: /where.*['"]\*['"]/g,
+                                points: -50,
+                                title: 'Wildcard in Where Clause',
+                                description: 'Wildcard filtering may expose unintended data',
+                                severity: 'major'
+                            },
+                            {
+                                pattern: /ago\([3-9]\d+d\)/g,
+                                points: -25,
+                                title: 'Extended Time Range Access',
+                                description: 'Accessing data older than 30 days without justification',
+                                severity: 'minor'
+                            }
+                        ]
+                    },
+                    functionality: {
+                        maxPoints: 200,
+                        rules: [
+                            {
+                                pattern: /where.*EventID.*contains.*\d+/g,
+                                points: -25,
+                                title: 'Incorrect EventID Filtering',
+                                description: 'EventID should use equality, not contains',
+                                severity: 'minor'
+                            },
+                            {
+                                pattern: /where.*TimeGenerated.*['""]\d{4}-\d{2}-\d{2}['"]/g,
+                                points: -30,
+                                title: 'String Date Comparison',
+                                description: 'Use datetime() function for date comparisons',
+                                severity: 'major'
+                            },
+                            {
+                                pattern: /summarize.*count\(\)\s*by.*count\(/g,
+                                points: -25,
+                                title: 'Redundant Counting Logic',
+                                description: 'Double counting in aggregation',
+                                severity: 'minor'
+                            },
+                            {
+                                pattern: /distinct.*\|\s*distinct/g,
+                                points: -20,
+                                title: 'Redundant Distinct Operations',
+                                description: 'Multiple distinct operations are unnecessary',
+                                severity: 'minor'
+                            },
+                            {
+                                pattern: /==\s*['"]\d+['"]/g,
+                                points: -30,
+                                title: 'Type Mismatch in Comparison',
+                                description: 'Comparing numbers as strings',
+                                severity: 'major'
+                            }
+                        ]
+                    },
+                    readability: {
+                        maxPoints: 100,
+                        rules: [
+                            {
+                                test: (query) => this.checkCommentRatio(query),
+                                points: 0, // Calculated dynamically
+                                title: 'Documentation Quality',
+                                description: 'Query documentation and comments',
+                                severity: 'suggestion'
+                            },
+                            {
+                                pattern: /let\s+[a-z]\s*=/g,
+                                points: -10,
+                                title: 'Poor Variable Naming',
+                                description: 'Use descriptive variable names',
+                                severity: 'minor'
+                            },
+                            {
+                                pattern: /\|[^\s]/g,
+                                points: -5,
+                                title: 'Poor Formatting',
+                                description: 'Add space after pipe operators',
+                                severity: 'minor'
+                            },
+                            {
+                                pattern: /.{200,}/g,
+                                points: -10,
+                                title: 'Line Length Violation',
+                                description: 'Lines should be under 200 characters',
+                                severity: 'minor'
+                            }
+                        ]
+                    },
+                    advanced: {
+                        maxPoints: 50,
+                        rules: [
+                            {
+                                pattern: /make-series|parse\s+|parse_json\(|geo_info_from_ip_address\(|materialize\(/g,
+                                points: +10,
+                                title: 'Advanced Feature Usage',
+                                description: 'Using advanced KQL features effectively',
+                                severity: 'good'
+                            },
+                            {
+                                pattern: /hint\.broadcast|hint\.shufflekey|partition\s+by/g,
+                                points: +10,
+                                title: 'Performance Optimization Features',
+                                description: 'Using performance optimization hints',
+                                severity: 'good'
+                            },
+                            {
+                                pattern: /lookup\s+kind=|has\s+|has_any\(|in~\s*\(/g,
+                                points: +5,
+                                title: 'Efficient Operator Usage',
+                                description: 'Using efficient operators for better performance',
+                                severity: 'good'
+                            }
+                        ]
+                    }
+                };
+
+                // PII fields for security analysis
+                this.piiFields = new Set([
+                    'email', 'EmailAddress', 'UserPrincipalName',
+                    'phone', 'PhoneNumber', 'AccountName', 'UserName',
+                    'Account', 'User', 'Identity'
+                ]);
             }
 
             initializeAIEngine() {
@@ -922,72 +1003,353 @@ SecurityEvent
             }
 
             performComprehensiveAnalysis(query) {
-                let overallScore = 10.0;
-                const issues = [];
-                const categories = {
-                    validation: { score: 10.0, issues: [], weight: 0.4 },
-                    performance: { score: 10.0, issues: [], weight: 0.3 },
-                    syntax: { score: 10.0, issues: [], weight: 0.15 },
-                    security: { score: 10.0, issues: [], weight: 0.1 },
-                    bestPractices: { score: 10.0, issues: [], weight: 0.05 }
+                // Initialize 1000-point scoring system
+                const results = {
+                    totalScore: 1000,
+                    maxScore: 1000,
+                    categoryScores: {
+                        syntax: { score: 150, maxScore: 150, issues: [] },
+                        performance: { score: 300, maxScore: 300, issues: [] },
+                        security: { score: 200, maxScore: 200, issues: [] },
+                        functionality: { score: 200, maxScore: 200, issues: [] },
+                        readability: { score: 100, maxScore: 100, issues: [] },
+                        advanced: { score: 50, maxScore: 50, issues: [] }
+                    },
+                    autoFail: false,
+                    violations: [],
+                    status: 'PASS'
                 };
 
-                // Validation checks first
-                let queryValid = true;
-                this.analysisRules.validation.forEach(rule => {
-                    const validationResult = rule.test(query);
-                    if (validationResult) {
-                        queryValid = false;
-                        const issue = {
-                            category: 'validation',
-                            severity: rule.severity,
-                            title: rule.title,
-                            description: validationResult,
-                            fix: 'Use valid Microsoft tables and proper KQL syntax',
-                            impact: 'Query will fail to execute',
-                            scoreImpact: rule.scoreImpact,
-                            line: 1
-                        };
-                        issues.push(issue);
-                        categories.validation.issues.push(issue);
-                        categories.validation.score = Math.max(categories.validation.score + rule.scoreImpact, 0);
-                    }
+                // Step 1: Check for auto-fail conditions
+                if (this.checkAutoFailConditions(query)) {
+                    results.autoFail = true;
+                    results.totalScore = 0;
+                    results.status = 'AUTO_FAIL';
+                    results.violations.push({
+                        severity: 'critical',
+                        title: 'AUTO-FAIL: Critical Pattern Detected',
+                        description: 'Query contains patterns that cause automatic failure',
+                        category: 'Auto-Fail'
+                    });
+                    return this.finalizeResults(results, query);
+                }
+
+                // Step 2: Validate basic table and structure requirements
+                const validationResult = this.validateBasicRequirements(query);
+                if (!validationResult.valid) {
+                    results.totalScore = Math.min(results.totalScore, 300); // Cap at 300 for invalid queries
+                    results.violations.push(...validationResult.violations);
+                }
+
+                // Step 3: Apply comprehensive scoring rules
+                Object.entries(this.scoringPatterns).forEach(([category, categoryData]) => {
+                    const categoryResult = this.evaluateCategory(query, category, categoryData);
+                    results.categoryScores[category] = categoryResult;
+                    results.violations.push(...categoryResult.issues);
                 });
 
-                // Apply other rules only if query is basically valid
-                if (queryValid) {
-                    Object.entries(this.analysisRules).forEach(([category, rules]) => {
-                        if (category === 'validation') return;
-                        
-                        rules.forEach(rule => {
-                            this.evaluateRule(rule, query, issues, categories[category], category);
-                        });
+                // Step 4: Calculate final score
+                results.totalScore = Object.values(results.categoryScores).reduce((total, cat) => {
+                    return total + Math.max(cat.score, 0);
+                }, 0);
+
+                // Step 5: Determine final status
+                if (results.totalScore >= 700) {
+                    results.status = 'PASS';
+                } else if (results.totalScore >= 400) {
+                    results.status = 'NEEDS_WORK';
+                } else {
+                    results.status = 'FAIL';
+                }
+
+                return this.finalizeResults(results, query);
+            }
+
+            checkAutoFailConditions(query) {
+                // Check all auto-fail patterns
+                for (const [category, patterns] of Object.entries(this.autoFailPatterns)) {
+                    for (const pattern of patterns) {
+                        if (pattern.test(query)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            validateBasicRequirements(query) {
+                const result = { valid: true, violations: [] };
+                
+                // Check for valid table names
+                const tables = this.extractTableNames(query);
+                const invalidTables = tables.filter(table => !this.validTables.has(table));
+                
+                if (invalidTables.length > 0) {
+                    result.valid = false;
+                    result.violations.push({
+                        severity: 'critical',
+                        title: 'Invalid Table References',
+                        description: `Invalid tables detected: ${invalidTables.join(', ')}`,
+                        category: 'Table Validation',
+                        points: -200
                     });
                 }
 
-                // Calculate weighted score
-                overallScore = Object.entries(categories).reduce((score, [category, data]) => {
-                    return score + (Math.max(data.score, 0) * data.weight);
-                }, 0);
+                // Check basic query structure
+                if (query.trim().length < 15) {
+                    result.valid = false;
+                    result.violations.push({
+                        severity: 'critical',
+                        title: 'Insufficient Query Length',
+                        description: 'Query is too short to be meaningful',
+                        category: 'Structure Validation',
+                        points: -150
+                    });
+                }
 
-                // Generate AI recommendations
-                const aiRecommendations = this.generateAIRecommendations(query, issues, overallScore);
-                const queryExplanation = this.generateQueryExplanation(query);
+                // Check for proper query start
+                if (!/^(let\s+\w+|[a-zA-Z]\w*)/.test(query.trim())) {
+                    result.valid = false;
+                    result.violations.push({
+                        severity: 'critical',
+                        title: 'Invalid Query Start',
+                        description: 'Query must start with table name or let statement',
+                        category: 'Structure Validation',
+                        points: -100
+                    });
+                }
+
+                return result;
+            }
+
+            evaluateCategory(query, categoryName, categoryData) {
+                const result = {
+                    score: categoryData.maxPoints,
+                    maxScore: categoryData.maxPoints,
+                    issues: []
+                };
+
+                // Apply each rule in the category
+                categoryData.rules.forEach(rule => {
+                    const ruleResult = this.evaluateRule(query, rule, categoryName);
+                    if (ruleResult.triggered) {
+                        result.score += ruleResult.points;
+                        result.issues.push(ruleResult.issue);
+                    }
+                });
+
+                // Ensure score doesn't go below 0 or above max
+                result.score = Math.max(0, Math.min(result.score, result.maxScore));
                 
-                const metrics = this.calculateQueryMetrics(query);
-                const compliance = this.checkCompliance(query, issues);
+                return result;
+            }
+
+            evaluateRule(query, rule, category) {
+                let triggered = false;
+                let matchCount = 0;
+
+                // Check if rule triggers
+                if (rule.pattern) {
+                    const matches = query.match(rule.pattern);
+                    if (matches) {
+                        triggered = true;
+                        matchCount = matches.length;
+                    }
+                } else if (rule.test && typeof rule.test === 'function') {
+                    const testResult = rule.test(query);
+                    if (testResult === true || (typeof testResult === 'string' && testResult)) {
+                        triggered = true;
+                        matchCount = 1;
+                    }
+                }
+
+                if (!triggered) {
+                    return { triggered: false };
+                }
+
+                // Calculate points (multiply by match count for patterns)
+                let points = rule.points * matchCount;
+                
+                // Special handling for dynamic scoring rules
+                if (category === 'readability' && rule.title === 'Documentation Quality') {
+                    points = this.checkCommentRatio(query);
+                }
+
+                // Create issue object
+                const issue = {
+                    severity: rule.severity || 'minor',
+                    title: rule.title,
+                    description: rule.description || 'Issue detected in query',
+                    category: category,
+                    points: points,
+                    matches: matchCount,
+                    line: this.findQueryLine(query, rule.pattern ? query.match(rule.pattern)?.[0] : '')
+                };
 
                 return {
-                    overallScore: Math.max(Math.round(overallScore * 10) / 10, 0),
-                    grade: this.calculateGrade(overallScore),
-                    categories,
-                    issues: issues.sort((a, b) => this.getSeverityWeight(b.severity) - this.getSeverityWeight(a.severity)),
-                    metrics,
-                    compliance,
-                    aiRecommendations,
-                    queryExplanation,
-                    valid: queryValid
+                    triggered: true,
+                    points: points,
+                    issue: issue
                 };
+            }
+
+            checkTimeFilterRequirement(query) {
+                // Check if query uses time-series tables
+                const tables = this.extractTableNames(query);
+                const hasTimeSeriesTable = tables.some(table => this.timeSeriesIndicators.has(table));
+                
+                if (!hasTimeSeriesTable) {
+                    return false; // No time filter required for non-time-series tables
+                }
+
+                // Check for datetime filter patterns
+                const dateTimePatterns = [
+                    /TimeGenerated\s*>=\s*ago\(/,
+                    /TimeGenerated\s*>\s*datetime\(/,
+                    /where.*TimeGenerated.*between/,
+                    /timestamp\s*>=\s*ago\(/
+                ];
+
+                return !dateTimePatterns.some(pattern => pattern.test(query));
+            }
+
+            checkCommentRatio(query) {
+                const lines = query.split('\n').filter(line => line.trim());
+                const commentLines = lines.filter(line => line.trim().startsWith('//'));
+                const ratio = commentLines.length / lines.length;
+                
+                if (ratio >= 0.2) return 25; // 20%+ commented gets full points
+                if (ratio >= 0.1) return 15; // 10%+ commented gets partial points
+                if (ratio > 0) return 10;    // Some comments get minimal points
+                return 0; // No comments = no points
+            }
+
+            finalizeResults(results, query) {
+                // Generate comprehensive analysis
+                const analysis = {
+                    overallScore: results.totalScore,
+                    maxScore: results.maxScore,
+                    percentage: Math.round((results.totalScore / results.maxScore) * 100),
+                    grade: this.calculateGrade(results.totalScore),
+                    status: results.status,
+                    autoFail: results.autoFail,
+                    categories: results.categoryScores,
+                    issues: results.violations.sort((a, b) => this.getSeverityWeight(b.severity) - this.getSeverityWeight(a.severity)),
+                    metrics: this.calculateAdvancedMetrics(query),
+                    aiRecommendations: this.generateComprehensiveRecommendations(query, results),
+                    queryExplanation: this.generateQueryExplanation(query),
+                    compliance: this.checkEnterpriseCompliance(results)
+                };
+
+                return analysis;
+            }
+
+            calculateGrade(score) {
+                if (score >= 900) return 'Excellent';
+                if (score >= 700) return 'Good';
+                if (score >= 500) return 'Fair';
+                if (score >= 300) return 'Poor';
+                return 'Fail';
+            }
+
+            calculateAdvancedMetrics(query) {
+                const lines = query.split('\n').length;
+                const operators = (query.match(/\|/g) || []).length;
+                const tables = this.extractTableNames(query);
+                const functions = this.extractFunctions(query);
+                
+                return {
+                    linesOfCode: lines,
+                    operators: operators,
+                    tables: tables.length,
+                    functions: functions.length,
+                    complexity: Math.min(this.calculateComplexity(query), 10),
+                    estimatedCost: this.estimateQueryCost(query),
+                    tableNames: tables,
+                    functionNames: functions.slice(0, 10) // Limit to first 10
+                };
+            }
+
+            generateComprehensiveRecommendations(query, results) {
+                const recommendations = [];
+                
+                // Critical issues first
+                const criticalIssues = results.violations.filter(i => i.severity === 'critical');
+                if (criticalIssues.length > 0) {
+                    recommendations.push({
+                        priority: 'CRITICAL',
+                        title: 'Immediate Action Required',
+                        content: `Your query has ${criticalIssues.length} critical issue(s) that prevent proper execution. These must be fixed immediately: ${criticalIssues.map(i => i.title).join(', ')}.`,
+                        action: 'Fix critical validation and syntax errors before proceeding',
+                        points: criticalIssues.reduce((sum, issue) => sum + Math.abs(issue.points || 0), 0)
+                    });
+                }
+
+                // Performance recommendations
+                const perfIssues = results.violations.filter(i => i.category === 'performance');
+                if (perfIssues.length > 0) {
+                    const perfPoints = perfIssues.reduce((sum, issue) => sum + Math.abs(issue.points || 0), 0);
+                    recommendations.push({
+                        priority: 'HIGH',
+                        title: 'Performance Optimization Required',
+                        content: `Performance issues detected that could significantly impact query execution. Total performance penalty: ${perfPoints} points.`,
+                        action: 'Implement time filtering, optimize joins, and reduce data processing overhead',
+                        points: perfPoints
+                    });
+                }
+
+                // Security recommendations
+                const securityIssues = results.violations.filter(i => i.category === 'security');
+                if (securityIssues.length > 0) {
+                    recommendations.push({
+                        priority: 'HIGH',
+                        title: 'Security Review Required',
+                        content: `Security vulnerabilities detected in query. Review data access patterns and sensitive field handling.`,
+                        action: 'Remove sensitive data projections and implement proper access controls',
+                        points: securityIssues.reduce((sum, issue) => sum + Math.abs(issue.points || 0), 0)
+                    });
+                }
+
+                // Score-based recommendations
+                if (results.totalScore >= 900) {
+                    recommendations.push({
+                        priority: 'EXCELLENT',
+                        title: 'Enterprise Excellence Achieved',
+                        content: 'Outstanding query quality! Your KQL demonstrates enterprise-level best practices and optimal performance patterns.',
+                        action: 'Consider sharing this query as a template for your team',
+                        points: 0
+                    });
+                } else if (results.totalScore >= 700) {
+                    recommendations.push({
+                        priority: 'GOOD',
+                        title: 'Production Ready with Minor Optimizations',
+                        content: 'Good query structure that meets enterprise standards. Address minor issues for optimal performance.',
+                        action: 'Implement suggested optimizations for production deployment',
+                        points: 1000 - results.totalScore
+                    });
+                } else if (results.totalScore < 400) {
+                    recommendations.push({
+                        priority: 'CRITICAL',
+                        title: 'Major Redesign Required',
+                        content: 'Query requires substantial improvements before any production use. Current implementation has significant issues.',
+                        action: 'Complete redesign following enterprise KQL standards',
+                        points: 1000 - results.totalScore
+                    });
+                }
+
+                return recommendations;
+            }
+
+            checkEnterpriseCompliance(results) {
+                const compliance = {
+                    syntax: results.categoryScores.syntax.score >= 120, // 80% of max
+                    performance: results.categoryScores.performance.score >= 210, // 70% of max
+                    security: results.categoryScores.security.score >= 160, // 80% of max
+                    functionality: results.categoryScores.functionality.score >= 140, // 70% of max
+                    overall: results.totalScore >= 700
+                };
+
+                return compliance;
             }
 
             evaluateRule(rule, query, allIssues, categoryData, category) {
@@ -1296,10 +1658,19 @@ SecurityEvent
                 const scoreDiv = document.createElement('div');
                 scoreDiv.className = 'score-display';
                 
+                const percentage = Math.round((analysis.overallScore / analysis.maxScore) * 100);
+                const statusIcon = analysis.autoFail ? '🚨' : 
+                                 analysis.overallScore >= 900 ? '🏆' :
+                                 analysis.overallScore >= 700 ? '✅' :
+                                 analysis.overallScore >= 400 ? '⚠️' : '❌';
+                
                 scoreDiv.innerHTML = `
-                    <div class="score-number" style="color: ${this.getScoreColor(analysis.overallScore)}">${analysis.overallScore}/10</div>
-                    <div class="score-grade grade-${analysis.grade.toLowerCase()}">${analysis.grade}</div>
-                    <div class="score-details">MXDR365 Enterprise Quality Score</div>
+                    <div class="score-number" style="color: ${this.getScoreColor(analysis.overallScore)}">${analysis.overallScore}/1000</div>
+                    <div class="score-grade grade-${analysis.grade.toLowerCase()}">${statusIcon} ${analysis.grade}</div>
+                    <div class="score-details">
+                        ${percentage}% | MXDR365 Enterprise Quality Score
+                        ${analysis.autoFail ? '<br><span style="color: var(--mxdr-critical); font-weight: bold;">AUTO-FAIL DETECTED</span>' : ''}
+                    </div>
                 `;
                 
                 container.appendChild(scoreDiv);
@@ -1392,22 +1763,27 @@ SecurityEvent
                 section.className = 'analysis-section';
                 
                 const categoryTitles = {
-                    validation: '🚨 Query Validation',
                     syntax: '📝 Syntax & Structure',
                     performance: '⚡ Performance Analysis',
                     security: '🛡️ Security Assessment',
-                    bestPractices: '✨ Best Practices'
+                    functionality: '🔧 Functional Correctness',
+                    readability: '📚 Code Quality & Readability',
+                    advanced: '🚀 Advanced Features'
                 };
 
-                const scoreClass = this.getCategoryScoreClass(data.score);
+                const scoreClass = this.getCategoryScoreClass(data.score, data.maxScore);
+                const percentage = Math.round((data.score / data.maxScore) * 100);
                 
                 section.innerHTML = `
                     <div class="analysis-header">
                         <div class="analysis-title">${categoryTitles[category]}</div>
-                        <div class="analysis-score ${scoreClass}">${Math.round(data.score * 10) / 10}/10</div>
+                        <div class="analysis-score ${scoreClass}">${data.score}/${data.maxScore} (${percentage}%)</div>
                     </div>
                     <div class="analysis-content">
-                        ${data.issues.map(issue => this.createIssueHTML(issue)).join('')}
+                        ${data.issues.length > 0 ? 
+                            data.issues.map(issue => this.createIssueHTML(issue)).join('') :
+                            '<div style="color: var(--mxdr-success); text-align: center; padding: 16px;">✅ No issues found in this category</div>'
+                        }
                     </div>
                 `;
                 
@@ -1456,16 +1832,25 @@ SecurityEvent
                     'good': '✅'
                 };
 
+                const pointsDisplay = issue.points !== undefined ? 
+                    `<span style="color: ${issue.points >= 0 ? 'var(--mxdr-success)' : 'var(--mxdr-error)'}; font-weight: bold;">
+                        ${issue.points >= 0 ? '+' : ''}${issue.points} pts
+                    </span>` : '';
+
                 return `
                     <div class="issue-item issue-${issue.severity}">
                         <div class="issue-header">
                             <div class="issue-title">${severityEmojis[issue.severity]} ${issue.title}</div>
-                            <div class="issue-severity severity-${issue.severity}">${issue.severity}</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                ${pointsDisplay}
+                                <div class="issue-severity severity-${issue.severity}">${issue.severity}</div>
+                            </div>
                         </div>
                         <div class="issue-description">${issue.description}</div>
                         <div class="issue-fix">
-                            <strong>Fix:</strong> ${issue.fix}
+                            <strong>Recommendation:</strong> ${issue.fix || issue.action || 'Review and address this issue'}
                             ${issue.line ? `<br><small>📍 Line ${issue.line}</small>` : ''}
+                            ${issue.matches > 1 ? `<br><small>🔢 Found ${issue.matches} occurrences</small>` : ''}
                             ${issue.impact ? `<br><small>💡 Impact: ${issue.impact}</small>` : ''}
                         </div>
                     </div>
@@ -1742,7 +2127,7 @@ SecurityEvent
                 if (currentQuery) {
                     const score = this.quickScoreQuery(currentQuery);
                     return `<strong>🔍 Quick Query Assessment:</strong><br><br>
-                    Estimated Score: <strong>${score}/10</strong><br><br>
+                    Estimated Score: <strong>${score}/1000</strong><br><br>
                     I can help you with:<br>
                     • Detailed performance optimization<br>
                     • Syntax validation and fixes<br>
