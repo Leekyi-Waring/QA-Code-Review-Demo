@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MXDR365 KQL Query Grader - Professional Edition</title>
+    <title>MXDR365 KQL Query Analyzer - Enterprise Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap');
         
@@ -14,14 +14,13 @@
         }
 
         :root {
-            --ms-blue: #0078d4;
-            --ms-blue-light: #106ebe;
-            --ms-blue-dark: #004578;
-            --ms-accent: #40e0d0;
-            --ms-success: #107c10;
-            --ms-warning: #ff8c00;
-            --ms-error: #d13438;
-            --ms-critical: #a4262c;
+            --mxdr-primary: #0078d4;
+            --mxdr-secondary: #106ebe;
+            --mxdr-accent: #40e0d0;
+            --mxdr-success: #107c10;
+            --mxdr-warning: #ff8c00;
+            --mxdr-error: #d13438;
+            --mxdr-critical: #a4262c;
             --bg-primary: #ffffff;
             --bg-secondary: #f8f9fa;
             --bg-tertiary: #f3f2f1;
@@ -29,8 +28,8 @@
             --text-secondary: #605e5c;
             --border-light: #edebe9;
             --border-medium: #d2d0ce;
-            --card-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            --card-shadow-hover: 0 2px 8px rgba(0,0,0,0.15);
+            --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --card-shadow-hover: 0 4px 8px rgba(0,0,0,0.15);
         }
 
         body {
@@ -41,55 +40,61 @@
         }
 
         .header {
-            background: linear-gradient(135deg, var(--ms-blue) 0%, var(--ms-blue-light) 100%);
+            background: linear-gradient(135deg, var(--mxdr-primary) 0%, var(--mxdr-secondary) 100%);
             color: white;
-            padding: 40px 0;
+            padding: 32px 0;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--card-shadow);
         }
 
         .header h1 {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
-        .header p {
-            font-size: 1.1rem;
+        .header .subtitle {
+            font-size: 1rem;
             opacity: 0.9;
             font-weight: 300;
         }
 
+        .header .version {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 32px 24px;
+            padding: 24px;
             display: grid;
-            grid-template-columns: 1fr 450px;
-            gap: 32px;
+            grid-template-columns: 1fr 500px;
+            gap: 24px;
         }
 
         .main-section {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
             border-radius: 8px;
-            padding: 32px;
+            padding: 24px;
             box-shadow: var(--card-shadow);
         }
 
         .section-title {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .query-editor {
             width: 100%;
-            height: 400px;
+            height: 350px;
             background: #f8f8f8;
             border: 1px solid var(--border-medium);
             border-radius: 4px;
@@ -104,25 +109,25 @@
         }
 
         .query-editor:focus {
-            border-color: var(--ms-blue);
+            border-color: var(--mxdr-primary);
             box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
         }
 
         .controls {
-            margin: 24px 0;
+            margin: 20px 0;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .control-label {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: var(--text-primary);
         }
@@ -138,15 +143,15 @@
         }
 
         .control-select:focus {
-            border-color: var(--ms-blue);
+            border-color: var(--mxdr-primary);
             outline: none;
             box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
         }
 
-        .grade-button {
+        .analyze-button {
             width: 100%;
             padding: 12px 24px;
-            background: var(--ms-blue);
+            background: var(--mxdr-primary);
             color: white;
             border: none;
             border-radius: 4px;
@@ -157,126 +162,109 @@
             margin-top: 16px;
         }
 
-        .grade-button:hover {
-            background: var(--ms-blue-light);
-        }
-
-        .grade-button:active {
-            background: var(--ms-blue-dark);
+        .analyze-button:hover {
+            background: var(--mxdr-secondary);
         }
 
         .results-panel {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
             border-radius: 8px;
-            padding: 24px;
+            padding: 20px;
             box-shadow: var(--card-shadow);
-            max-height: calc(100vh - 200px);
+            max-height: calc(100vh - 140px);
             overflow-y: auto;
             position: sticky;
-            top: 24px;
-        }
-
-        .results-panel::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .results-panel::-webkit-scrollbar-track {
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-        }
-
-        .results-panel::-webkit-scrollbar-thumb {
-            background: var(--border-medium);
-            border-radius: 4px;
+            top: 20px;
         }
 
         .score-display {
             text-align: center;
-            padding: 24px;
+            padding: 20px;
             background: var(--bg-secondary);
             border-radius: 8px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             border: 1px solid var(--border-light);
         }
 
         .score-number {
-            font-size: 3rem;
+            font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 8px;
         }
 
+        .score-details {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
         .score-grade {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            padding: 8px 16px;
+            padding: 6px 16px;
             border-radius: 4px;
             display: inline-block;
             margin-top: 8px;
         }
 
-        .grade-a { background: var(--ms-success); color: white; }
-        .grade-b { background: #2aa0f0; color: white; }
-        .grade-c { background: var(--ms-warning); color: white; }
-        .grade-d { background: var(--ms-error); color: white; }
-        .grade-f { background: var(--ms-critical); color: white; }
+        .grade-excellent { background: var(--mxdr-success); color: white; }
+        .grade-good { background: var(--mxdr-primary); color: white; }
+        .grade-fair { background: var(--mxdr-warning); color: white; }
+        .grade-poor { background: var(--mxdr-error); color: white; }
+        .grade-fail { background: var(--mxdr-critical); color: white; }
 
         .analysis-section {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             border: 1px solid var(--border-light);
-            border-radius: 8px;
+            border-radius: 6px;
             overflow: hidden;
         }
 
         .analysis-header {
             background: var(--bg-secondary);
-            padding: 16px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border-light);
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
         }
 
         .analysis-title {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--text-primary);
         }
 
         .analysis-score {
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-size: 0.9rem;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 0.8rem;
             font-weight: 600;
         }
 
-        .score-excellent { background: var(--ms-success); color: white; }
-        .score-good { background: var(--ms-blue); color: white; }
-        .score-fair { background: var(--ms-warning); color: white; }
-        .score-poor { background: var(--ms-error); color: white; }
+        .score-excellent { background: var(--mxdr-success); color: white; }
+        .score-good { background: var(--mxdr-primary); color: white; }
+        .score-fair { background: var(--mxdr-warning); color: white; }
+        .score-poor { background: var(--mxdr-error); color: white; }
 
         .analysis-content {
             padding: 16px;
         }
 
-        .issue-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
         .issue-item {
-            padding: 16px;
-            border-radius: 6px;
-            border-left: 4px solid;
+            padding: 14px;
+            border-radius: 4px;
+            border-left: 3px solid;
             background: var(--bg-secondary);
+            margin-bottom: 12px;
         }
 
-        .issue-critical { border-left-color: var(--ms-critical); }
-        .issue-major { border-left-color: var(--ms-error); }
-        .issue-minor { border-left-color: var(--ms-warning); }
-        .issue-suggestion { border-left-color: var(--ms-blue); }
-        .issue-good { border-left-color: var(--ms-success); }
+        .issue-critical { border-left-color: var(--mxdr-critical); }
+        .issue-major { border-left-color: var(--mxdr-error); }
+        .issue-minor { border-left-color: var(--mxdr-warning); }
+        .issue-suggestion { border-left-color: var(--mxdr-primary); }
+        .issue-good { border-left-color: var(--mxdr-success); }
 
         .issue-header {
             display: flex;
@@ -288,55 +276,98 @@
         .issue-title {
             font-weight: 600;
             color: var(--text-primary);
+            font-size: 0.9rem;
         }
 
         .issue-severity {
-            padding: 4px 8px;
+            padding: 2px 8px;
             border-radius: 3px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
         }
 
-        .severity-critical { background: var(--ms-critical); color: white; }
-        .severity-major { background: var(--ms-error); color: white; }
-        .severity-minor { background: var(--ms-warning); color: white; }
-        .severity-suggestion { background: var(--ms-blue); color: white; }
-        .severity-good { background: var(--ms-success); color: white; }
+        .severity-critical { background: var(--mxdr-critical); color: white; }
+        .severity-major { background: var(--mxdr-error); color: white; }
+        .severity-minor { background: var(--mxdr-warning); color: white; }
+        .severity-suggestion { background: var(--mxdr-primary); color: white; }
+        .severity-good { background: var(--mxdr-success); color: white; }
 
         .issue-description {
             color: var(--text-secondary);
-            margin-bottom: 12px;
-            line-height: 1.5;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
 
         .issue-fix {
-            background: rgba(0, 120, 212, 0.1);
+            background: rgba(0, 120, 212, 0.08);
             border: 1px solid rgba(0, 120, 212, 0.2);
             border-radius: 4px;
-            padding: 12px;
+            padding: 10px;
             color: var(--text-primary);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
 
-        .code-example {
-            background: #f8f8f8;
-            border: 1px solid var(--border-medium);
-            border-radius: 4px;
-            padding: 8px;
-            margin: 8px 0;
-            font-family: 'Consolas', monospace;
-            font-size: 0.85rem;
+        .ai-recommendations {
+            background: linear-gradient(135deg, rgba(64, 224, 208, 0.1), rgba(0, 120, 212, 0.1));
+            border: 1px solid var(--mxdr-accent);
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .ai-title {
+            font-weight: 600;
+            color: var(--mxdr-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-content {
             color: var(--text-primary);
-            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border: 1px solid var(--border-light);
+        }
+
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--mxdr-primary);
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
         }
 
         .ai-chat {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 350px;
-            height: 400px;
+            bottom: 20px;
+            right: 20px;
+            width: 380px;
+            height: 450px;
             background: var(--bg-primary);
             border: 1px solid var(--border-medium);
             border-radius: 8px;
@@ -347,7 +378,7 @@
         }
 
         .ai-chat-header {
-            background: var(--ms-blue);
+            background: var(--mxdr-primary);
             color: white;
             padding: 12px 16px;
             border-radius: 8px 8px 0 0;
@@ -355,13 +386,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 0.9rem;
         }
 
         .ai-chat-body {
             flex: 1;
             padding: 16px;
             overflow-y: auto;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .ai-chat-input {
@@ -377,46 +409,38 @@
             border: 1px solid var(--border-medium);
             border-radius: 4px;
             margin-right: 8px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             outline: none;
-        }
-
-        .ai-chat-input input:focus {
-            border-color: var(--ms-blue);
         }
 
         .ai-chat-button {
             padding: 8px 16px;
-            background: var(--ms-blue);
+            background: var(--mxdr-primary);
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .ai-chat-button:hover {
-            background: var(--ms-blue-light);
+            font-size: 0.85rem;
         }
 
         .chat-toggle {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 60px;
-            height: 60px;
-            background: var(--ms-blue);
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: var(--mxdr-primary);
             color: white;
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             box-shadow: var(--card-shadow-hover);
             transition: background-color 0.2s ease;
         }
 
         .chat-toggle:hover {
-            background: var(--ms-blue-light);
+            background: var(--mxdr-secondary);
         }
 
         .chat-message {
@@ -424,10 +448,11 @@
             padding: 8px 12px;
             border-radius: 6px;
             line-height: 1.4;
+            font-size: 0.85rem;
         }
 
         .chat-user {
-            background: var(--ms-blue);
+            background: var(--mxdr-primary);
             color: white;
             margin-left: 20px;
         }
@@ -440,48 +465,20 @@
 
         .welcome-state {
             text-align: center;
-            padding: 48px 24px;
+            padding: 40px 20px;
             color: var(--text-secondary);
         }
 
         .welcome-state h3 {
             color: var(--text-primary);
             margin-bottom: 16px;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
-
-        .metric-card {
-            text-align: center;
-            padding: 16px;
-            background: var(--bg-secondary);
-            border-radius: 6px;
-            border: 1px solid var(--border-light);
-        }
-
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--ms-blue);
-        }
-
-        .metric-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 4px;
+            font-size: 1.1rem;
         }
 
         @media (max-width: 1200px) {
             .container {
                 grid-template-columns: 1fr;
-                gap: 24px;
+                gap: 20px;
             }
             
             .results-panel {
@@ -496,7 +493,7 @@
             }
             
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
             
             .controls {
@@ -504,28 +501,29 @@
             }
             
             .ai-chat {
-                width: 300px;
-                height: 350px;
+                width: 320px;
+                height: 400px;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🔍 MXDR365 KQL Query Grader</h1>
-        <p>Professional-grade KQL analysis meeting MXDR365 engineering standards</p>
+        <h1>🔬 MXDR365 KQL Query Analyzer</h1>
+        <div class="subtitle">Enterprise-Grade KQL Analysis & Optimization Platform</div>
+        <div class="version">Version 2.1.0 - Enterprise Edition</div>
     </div>
 
     <div class="container">
         <div class="main-section">
             <div class="section-title">
-                📝 KQL Query Analysis
+                📝 KQL Query Analysis Engine
             </div>
             
             <textarea 
                 id="queryEditor" 
                 class="query-editor" 
-                placeholder="// Enter your KQL query for comprehensive MXDR365-standard analysis
+                placeholder="// Enter your KQL query for comprehensive MXDR365 analysis
 // Example:
 SecurityEvent
 | where TimeGenerated > ago(7d)
@@ -540,10 +538,10 @@ SecurityEvent
                 <div class="control-group">
                     <label class="control-label">Analysis Depth</label>
                     <select id="analysisDepth" class="control-select">
-                        <option value="standard">Standard Review</option>
-                        <option value="thorough">Thorough Analysis</option>
+                        <option value="standard">Standard Analysis</option>
+                        <option value="thorough">Thorough Review</option>
                         <option value="comprehensive" selected>Comprehensive Audit</option>
-                        <option value="MXDR365">MXDR365 Standards</option>
+                        <option value="enterprise">Enterprise Standard</option>
                     </select>
                 </div>
                 
@@ -554,6 +552,7 @@ SecurityEvent
                         <option value="analytics">Log Analytics</option>
                         <option value="defender">Microsoft 365 Defender</option>
                         <option value="adx">Azure Data Explorer</option>
+                        <option value="fabric">Microsoft Fabric</option>
                     </select>
                 </div>
                 
@@ -565,6 +564,7 @@ SecurityEvent
                         <option value="analytics" selected>Security Analytics</option>
                         <option value="investigation">Incident Investigation</option>
                         <option value="reporting">Executive Reporting</option>
+                        <option value="automation">SOAR Automation</option>
                     </select>
                 </div>
                 
@@ -575,12 +575,13 @@ SecurityEvent
                         <option value="speed">Maximum Speed</option>
                         <option value="accuracy">Maximum Accuracy</option>
                         <option value="cost">Cost Optimization</option>
+                        <option value="scale">Enterprise Scale</option>
                     </select>
                 </div>
             </div>
 
-            <button id="gradeButton" class="grade-button">
-                🎯 Grade Query
+            <button id="analyzeButton" class="analyze-button">
+                🎯 Analyze Query with MXDR365 AI
             </button>
         </div>
 
@@ -590,15 +591,16 @@ SecurityEvent
             </div>
             
             <div id="welcomeState" class="welcome-state">
-                <h3>Ready for Analysis</h3>
-                <p>Enter your KQL query and click "Grade Query" to receive comprehensive feedback based on Microsoft engineering standards.</p>
-                <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 6px;">
-                    <strong>Analysis includes:</strong><br>
-                    • Syntax & structure validation<br>
-                    • Performance optimization tips<br>
-                    • Security best practices<br>
-                    • Microsoft standard compliance<br>
-                    • Actionable improvement suggestions
+                <h3>MXDR365 AI Ready</h3>
+                <p>Enter your KQL query and click "Analyze" to receive comprehensive analysis with AI-powered recommendations.</p>
+                <div style="margin-top: 20px; padding: 16px; background: var(--bg-secondary); border-radius: 6px; font-size: 0.85rem;">
+                    <strong>Comprehensive Analysis includes:</strong><br>
+                    • Query validation & structure analysis<br>
+                    • Performance optimization recommendations<br>
+                    • Security best practices assessment<br>
+                    • AI-powered improvement suggestions<br>
+                    • Enterprise compliance scoring<br>
+                    • Real-time chat assistance
                 </div>
             </div>
             
@@ -607,22 +609,23 @@ SecurityEvent
     </div>
 
     <!-- AI Chat Interface -->
-    <button id="chatToggle" class="chat-toggle">💬</button>
+    <button id="chatToggle" class="chat-toggle">🤖</button>
     
     <div id="aiChat" class="ai-chat">
         <div class="ai-chat-header">
-            🤖 KQL Assistant
-            <button onclick="toggleChat()" style="background:none;border:none;color:white;cursor:pointer;font-size:1.2rem;">×</button>
+            🤖 MXDR365 AI Assistant
+            <button onclick="toggleChat()" style="background:none;border:none;color:white;cursor:pointer;font-size:1.1rem;">×</button>
         </div>
         <div class="ai-chat-body" id="chatBody">
             <div class="chat-message chat-ai">
-                Hello! I'm your KQL assistant. I can help you with:
+                Hello! I'm your MXDR365 AI assistant. I provide intelligent KQL guidance including:
                 <br><br>
-                • Query optimization techniques<br>
-                • Microsoft best practices<br>
-                • Syntax explanations<br>
+                • Query optimization strategies<br>
                 • Performance troubleshooting<br>
-                • Security considerations
+                • Security best practices<br>
+                • Syntax explanations<br>
+                • Enterprise compliance tips<br>
+                • Custom recommendations
             </div>
         </div>
         <div class="ai-chat-input">
@@ -632,87 +635,117 @@ SecurityEvent
     </div>
 
     <script>
-        class MicrosoftKQLGrader {
+        class MXDR365KQLAnalyzer {
             constructor() {
                 this.initializeEventListeners();
-                this.initializeKQLRules();
+                this.initializeValidationEngine();
+                this.initializeAIEngine();
             }
 
             initializeEventListeners() {
-                document.getElementById('gradeButton').addEventListener('click', () => this.gradeQuery());
+                document.getElementById('analyzeButton').addEventListener('click', () => this.analyzeQuery());
                 document.getElementById('chatToggle').addEventListener('click', () => this.toggleChat());
             }
 
-            initializeKQLRules() {
-                this.microsoftStandards = {
-                    syntax: [
+            initializeValidationEngine() {
+                // Comprehensive Microsoft table validation
+                this.validTables = new Set([
+                    'SecurityEvent', 'SigninLogs', 'AuditLogs', 'DeviceEvents', 'DeviceProcessEvents',
+                    'DeviceNetworkEvents', 'DeviceFileEvents', 'DeviceRegistryEvents', 'DeviceLogonEvents',
+                    'IdentityInfo', 'IdentityDirectoryEvents', 'IdentityLogonEvents', 'IdentityQueryEvents',
+                    'EmailEvents', 'EmailAttachmentInfo', 'EmailUrlInfo', 'EmailPostDeliveryEvents',
+                    'AlertInfo', 'AlertEvidence', 'ThreatIntelligenceIndicator', 'DeviceInfo',
+                    'Heartbeat', 'Usage', 'Operation', 'Perf', 'Event', 'Syslog', 'SecurityAlert',
+                    'SecurityIncident', 'CommonSecurityLog', 'AADNonInteractiveUserSignInLogs',
+                    'AADServicePrincipalSignInLogs', 'AADManagedIdentitySignInLogs', 'DeviceNetworkInfo',
+                    'DeviceTvmSoftwareInventory', 'DeviceTvmSoftwareVulnerabilities', 'AppFileEvents',
+                    'BehaviorAnalytics', 'CloudAppEvents', 'UrlClickEvents', 'OfficeActivity',
+                    'PowerBIAudit', 'AzureActivity', 'AzureDiagnostics', 'WindowsEvent', 'Watchlist',
+                    'InsightsMetrics', 'SecurityRecommendation', 'Update', 'UpdateSummary', 'VMConnection',
+                    'W3CIISLog', 'Wire', 'WireData', 'ServiceFabricOperationalEvent', 'ServiceMapComputer_CL'
+                ]);
+
+                // Comprehensive KQL operators and functions
+                this.validOperators = new Set([
+                    'where', 'project', 'extend', 'summarize', 'order', 'sort', 'top', 'limit', 'take',
+                    'join', 'union', 'let', 'datatable', 'range', 'print', 'evaluate', 'invoke',
+                    'distinct', 'sample', 'count', 'dcount', 'countif', 'dcountif', 'sum', 'avg',
+                    'min', 'max', 'any', 'make_list', 'make_set', 'percentile', 'stdev', 'variance',
+                    'arg_max', 'arg_min', 'has', 'has_any', 'contains', 'contains_cs', 'startswith',
+                    'endswith', 'matches', 'in', 'between', 'ago', 'now', 'bin', 'floor', 'ceiling',
+                    'round', 'abs', 'parse', 'extract', 'split', 'strcat', 'strlen', 'substring',
+                    'tolower', 'toupper', 'trim', 'replace', 'isempty', 'isnotempty', 'isnull',
+                    'isnotnull', 'todynamic', 'tostring', 'toint', 'tolong', 'toreal', 'todatetime',
+                    'mv-expand', 'mv-apply', 'materialize', 'fork', 'facet'
+                ]);
+
+                this.analysisRules = {
+                    validation: [
                         {
-                            pattern: /\b(WHERE|SUMMARIZE|PROJECT|EXTEND|JOIN|UNION)\b/g,
-                            severity: 'minor',
-                            title: 'Operator Casing',
-                            description: 'KQL operators should be lowercase for consistency with Microsoft standards.',
-                            fix: 'Use lowercase operators: where, summarize, project, extend, join, union',
-                            impact: 'Improves code consistency and readability',
-                            scoreImpact: -5
-                        },
-                        {
-                            pattern: /;(?=\s*$)/gm,
-                            severity: 'minor',
-                            title: 'Unnecessary Semicolons',
-                            description: 'KQL does not require semicolons at the end of statements.',
-                            fix: 'Remove trailing semicolons',
-                            impact: 'Cleaner, more idiomatic KQL syntax',
-                            scoreImpact: -2
-                        },
-                        {
-                            pattern: /\|\s*\|/g,
+                            test: (query) => this.validateTableNames(query),
                             severity: 'critical',
-                            title: 'Syntax Error: Double Pipes',
-                            description: 'Consecutive pipe operators will cause query failure.',
-                            fix: 'Remove duplicate pipe operators',
-                            impact: 'Query will fail to execute',
-                            scoreImpact: -25
+                            title: 'Invalid Table References',
+                            category: 'Table Validation',
+                            scoreImpact: -4.0
+                        },
+                        {
+                            test: (query) => this.validateBasicStructure(query),
+                            severity: 'critical', 
+                            title: 'Invalid Query Structure',
+                            category: 'Syntax Validation',
+                            scoreImpact: -3.5
+                        },
+                        {
+                            test: (query) => this.validateOperators(query),
+                            severity: 'major',
+                            title: 'Invalid KQL Operators',
+                            category: 'Operator Validation',
+                            scoreImpact: -2.5
+                        },
+                        {
+                            test: (query) => this.validateMeaningfulness(query),
+                            severity: 'major',
+                            title: 'Query Analysis Deficiency',
+                            category: 'Analytical Value',
+                            scoreImpact: -2.0
                         }
                     ],
-
                     performance: [
                         {
-                            pattern: /^(?!.*TimeGenerated.*ago\()/m,
                             test: (query) => !query.match(/TimeGenerated\s*[><=]+\s*ago\([^)]+\)/gi),
                             severity: 'critical',
-                            title: 'Missing Time Filter',
-                            description: 'Queries without time boundaries scan entire table history, causing severe performance issues.',
+                            title: 'Missing Time Boundaries',
+                            description: 'Query lacks time filtering, which will scan entire table history causing severe performance degradation.',
                             fix: 'Add time filter: | where TimeGenerated > ago(7d)',
-                            impact: 'Can cause 100x+ performance degradation and query timeouts',
-                            scoreImpact: -40,
-                            line: 1
+                            category: 'Time Filtering',
+                            scoreImpact: -3.0
                         },
                         {
                             pattern: /\|\s*project\s+\*/gi,
                             severity: 'major',
-                            title: 'Wildcard Projection',
-                            description: 'Selecting all columns increases data transfer and processing overhead.',
+                            title: 'Wildcard Column Projection',
+                            description: 'Selecting all columns (*) increases data transfer overhead and processing costs.',
                             fix: 'Specify exact columns: | project TimeGenerated, Computer, Account',
-                            impact: 'Reduces bandwidth usage and improves query performance',
-                            scoreImpact: -15
+                            category: 'Column Selection',
+                            scoreImpact: -1.5
                         },
                         {
                             pattern: /\|\s*extend.*\|\s*where/gi,
                             severity: 'major',
-                            title: 'Compute Before Filter',
+                            title: 'Compute Before Filter Pattern',
                             description: 'Computing extended columns before filtering wastes resources on data that will be discarded.',
                             fix: 'Move where clauses before extend operations',
-                            impact: '3-5x performance improvement possible',
-                            scoreImpact: -12
+                            category: 'Operation Ordering',
+                            scoreImpact: -1.2
                         },
                         {
                             pattern: /\|\s*order\s+by.*\|\s*take/gi,
                             severity: 'minor',
-                            title: 'Sort Before Limit',
-                            description: 'ORDER BY followed by TAKE forces full dataset sorting.',
+                            title: 'Sort Before Limit Anti-Pattern',
+                            description: 'ORDER BY followed by TAKE forces full dataset sorting before limiting.',
                             fix: 'Use | top N by Column [desc] for better performance',
-                            impact: '2-10x faster execution with top operator',
-                            scoreImpact: -8
+                            category: 'Sorting Optimization',
+                            scoreImpact: -0.8
                         },
                         {
                             pattern: /contains\s+".*\*.*"/gi,
@@ -720,123 +753,163 @@ SecurityEvent
                             title: 'Inefficient Wildcard Search',
                             description: 'Wildcard searches with contains are less efficient than specific operators.',
                             fix: 'Use has, startswith, or endswith for better performance',
-                            impact: 'More efficient string matching',
-                            scoreImpact: -5
+                            category: 'String Operations',
+                            scoreImpact: -0.5
                         }
                     ],
-
-                    logic: [
+                    syntax: [
                         {
-                            pattern: /\|\s*where.*TimeGenerated.*and.*TimeGenerated/gi,
+                            pattern: /\b(WHERE|SUMMARIZE|PROJECT|EXTEND|JOIN|UNION)\b/g,
                             severity: 'minor',
-                            title: 'Redundant Time Filtering',
-                            description: 'Multiple TimeGenerated filters can be simplified.',
-                            fix: 'Combine into single time range: | where TimeGenerated between(datetime(start)..datetime(end))',
-                            impact: 'Cleaner logic and potentially better performance',
-                            scoreImpact: -6
+                            title: 'Operator Case Inconsistency',
+                            description: 'KQL operators should be lowercase for consistency.',
+                            fix: 'Use lowercase: where, summarize, project, extend, join, union',
+                            category: 'Code Style',
+                            scoreImpact: -0.3
                         },
                         {
-                            pattern: /\|\s*where.*==\s*""\s*$|=\s*''\s*$/gm,
-                            severity: 'major',
-                            title: 'Empty String Comparison',
-                            description: 'Comparing to empty strings may not behave as expected in KQL.',
-                            fix: 'Use isempty() or isnotempty() functions',
-                            impact: 'More predictable null/empty handling',
-                            scoreImpact: -10
+                            pattern: /\|\s*\|/g,
+                            severity: 'critical',
+                            title: 'Syntax Error: Consecutive Pipes',
+                            description: 'Consecutive pipe operators will cause query execution failure.',
+                            fix: 'Remove duplicate pipe operators',
+                            category: 'Syntax Error',
+                            scoreImpact: -2.5
                         },
                         {
-                            pattern: /\|\s*summarize.*count.*\|\s*where.*count.*==\s*0/gi,
-                            severity: 'major',
-                            title: 'Zero Count Logic Issue',
-                            description: 'Filtering for zero counts after summarization typically returns no results.',
-                            fix: 'Review logic - zero counts are usually excluded by default',
-                            impact: 'Query may not return expected results',
-                            scoreImpact: -15
+                            pattern: /;(?=\s*$)/gm,
+                            severity: 'minor',
+                            title: 'Unnecessary Semicolons',
+                            description: 'KQL does not require semicolons at statement end.',
+                            fix: 'Remove trailing semicolons',
+                            category: 'Code Style',
+                            scoreImpact: -0.2
                         }
                     ],
-
-                    bestPractices: [
-                        {
-                            pattern: /^(?!.*\/\/).*$/m,
-                            test: (query) => !query.includes('//') && query.length > 100,
-                            severity: 'suggestion',
-                            title: 'Missing Documentation',
-                            description: 'Complex queries benefit from comments explaining purpose and methodology.',
-                            fix: 'Add comments: // Purpose: Detect suspicious login patterns',
-                            impact: 'Improves maintainability and team collaboration',
-                            scoreImpact: -8
-                        },
-                        {
-                            pattern: /\|\s*take\s+(?:[1-9]\d{3,})/gi,
-                            severity: 'suggestion',
-                            title: 'Large Result Set',
-                            description: 'Taking more than 1000 records may indicate inefficient analysis approach.',
-                            fix: 'Consider summarization or pagination for large datasets',
-                            impact: 'Better performance and more focused analysis',
-                            scoreImpact: -5
-                        },
-                        {
-                            pattern: /SecurityEvent.*EventID.*(?:4624|4625|4688|4672)/gi,
-                            severity: 'good',
-                            title: 'Security Event Focus',
-                            description: 'Query targets high-value security events for analysis.',
-                            fix: 'Excellent focus on authentication and privilege events',
-                            impact: 'Effective security monitoring approach',
-                            scoreImpact: +8
-                        },
-                        {
-                            pattern: /let\s+\w+\s*=/gi,
-                            severity: 'good',
-                            title: 'Variable Usage',
-                            description: 'Proper use of variables improves query maintainability.',
-                            fix: 'Excellent practice for reusable and readable queries',
-                            impact: 'Better code organization and reusability',
-                            scoreImpact: +10
-                        }
-                    ],
-
                     security: [
                         {
                             pattern: /\|\s*project.*(?:password|secret|key|token|credential|ssn|social)/gi,
                             severity: 'critical',
-                            title: 'Sensitive Data Exposure',
-                            description: 'Query may expose sensitive data fields.',
+                            title: 'Sensitive Data Exposure Risk',
+                            description: 'Query may expose sensitive data fields in results.',
                             fix: 'Remove sensitive columns or use data masking functions',
-                            impact: 'Prevents potential data privacy violations',
-                            scoreImpact: -30
+                            category: 'Data Protection',
+                            scoreImpact: -2.0
                         },
                         {
                             pattern: /union\s+(?:\w+\s*,\s*){4,}/gi,
                             severity: 'minor',
-                            title: 'Multiple Table Union',
+                            title: 'Multiple Table Union Complexity',
                             description: 'Unioning many tables may mix different data classification levels.',
                             fix: 'Ensure all tables have compatible data classifications',
-                            impact: 'Maintains data governance compliance',
-                            scoreImpact: -8
+                            category: 'Data Governance',
+                            scoreImpact: -0.5
+                        }
+                    ],
+                    bestPractices: [
+                        {
+                            test: (query) => !query.includes('//') && query.length > 150,
+                            severity: 'suggestion',
+                            title: 'Documentation Deficiency',
+                            description: 'Complex queries benefit from comments explaining methodology.',
+                            fix: 'Add comments: // Purpose: Analyze login patterns for anomalies',
+                            category: 'Documentation',
+                            scoreImpact: -0.7
+                        },
+                        {
+                            pattern: /SecurityEvent.*EventID.*(?:4624|4625|4688|4672)/gi,
+                            severity: 'good',
+                            title: 'Security Event Analysis Focus',
+                            description: 'Query effectively targets high-value security events.',
+                            fix: 'Excellent focus on authentication and privilege events',
+                            category: 'Security Analysis',
+                            scoreImpact: +0.5
+                        },
+                        {
+                            pattern: /let\s+\w+\s*=/gi,
+                            severity: 'good',
+                            title: 'Variable Usage Excellence',
+                            description: 'Proper use of variables improves maintainability.',
+                            fix: 'Excellent practice for reusable queries',
+                            category: 'Code Organization',
+                            scoreImpact: +0.8
                         }
                     ]
                 };
+            }
 
-                this.tableKnowledge = {
-                    'SecurityEvent': {
-                        indexed: ['TimeGenerated', 'Computer', 'EventID', 'Account'],
-                        performance: 'Always filter by TimeGenerated first, then EventID',
-                        common: 'EventID 4624=logon success, 4625=logon failure, 4688=process creation'
-                    },
-                    'SigninLogs': {
-                        indexed: ['TimeGenerated', 'UserPrincipalName', 'ResultType'],
-                        performance: 'Filter by TimeGenerated and ResultType for optimal performance',
-                        common: 'ResultType 0=success, 50126=invalid credentials'
-                    },
-                    'DeviceEvents': {
-                        indexed: ['TimeGenerated', 'DeviceName', 'ActionType'],
-                        performance: 'Use ActionType filter early for significant performance gains',
-                        common: 'ActionTypes: ProcessCreated, NetworkConnectionInitiated, FileCreated'
-                    }
+            initializeAIEngine() {
+                this.aiPersonality = {
+                    expertise: 'MXDR365 KQL Optimization Specialist',
+                    tone: 'Professional, Helpful, Technical',
+                    focus: 'Enterprise Security Analytics'
                 };
             }
 
-            gradeQuery() {
+            validateTableNames(query) {
+                const tablePattern = /^(\w+)(?:\s*\||\s*$)/gm;
+                const matches = [...query.matchAll(tablePattern)];
+                const usedTables = matches.map(m => m[1]).filter(t => 
+                    !['let', 'print', 'range', 'datatable'].includes(t.toLowerCase())
+                );
+
+                const invalidTables = usedTables.filter(table => !this.validTables.has(table));
+                return invalidTables.length > 0 ? `Invalid tables detected: ${invalidTables.join(', ')}. These tables do not exist in Microsoft security environments.` : null;
+            }
+
+            validateBasicStructure(query) {
+                const trimmed = query.trim();
+                
+                if (trimmed.length < 15) {
+                    return 'Query is too short to be meaningful for analysis';
+                }
+
+                if (!/^(let\s+\w+|[a-zA-Z]\w*)/.test(trimmed)) {
+                    return 'Query must start with a valid table name or let statement';
+                }
+
+                const openParens = (trimmed.match(/\(/g) || []).length;
+                const closeParens = (trimmed.match(/\)/g) || []).length;
+                if (openParens !== closeParens) {
+                    return 'Unmatched parentheses detected in query structure';
+                }
+
+                return null;
+            }
+
+            validateOperators(query) {
+                const operatorPattern = /\|\s*([a-zA-Z-]+)/g;
+                const matches = [...query.matchAll(operatorPattern)];
+                const usedOperators = matches.map(m => m[1].toLowerCase());
+
+                const invalidOperators = usedOperators.filter(op => !this.validOperators.has(op));
+                return invalidOperators.length > 0 ? `Invalid KQL operators detected: ${invalidOperators.join(', ')}. These are not valid KQL operators.` : null;
+            }
+
+            validateMeaningfulness(query) {
+                const trimmed = query.trim().toLowerCase();
+                
+                const nonsensePatterns = [
+                    /^test|demo|example|fake|dummy|placeholder/,
+                    /abcd|1234|qwerty|asdf|zxcv|lorem|ipsum/,
+                    /^[a-z]+\s*$/
+                ];
+
+                for (const pattern of nonsensePatterns) {
+                    if (pattern.test(trimmed)) {
+                        return 'Query appears to contain test/placeholder content without analytical value';
+                    }
+                }
+
+                const hasAnalysis = /where|summarize|project|extend|join|order|top|count|distinct/.test(trimmed);
+                if (!hasAnalysis) {
+                    return 'Query lacks analytical operations (filtering, summarization, aggregation, etc.)';
+                }
+
+                return null;
+            }
+
+            analyzeQuery() {
                 const query = document.getElementById('queryEditor').value.trim();
                 
                 if (!query) {
@@ -849,42 +922,71 @@ SecurityEvent
             }
 
             performComprehensiveAnalysis(query) {
-                let overallScore = 100;
+                let overallScore = 10.0;
                 const issues = [];
                 const categories = {
-                    syntax: { score: 100, issues: [] },
-                    performance: { score: 100, issues: [] },
-                    logic: { score: 100, issues: [] },
-                    bestPractices: { score: 100, issues: [] },
-                    security: { score: 100, issues: [] }
+                    validation: { score: 10.0, issues: [], weight: 0.4 },
+                    performance: { score: 10.0, issues: [], weight: 0.3 },
+                    syntax: { score: 10.0, issues: [], weight: 0.15 },
+                    security: { score: 10.0, issues: [], weight: 0.1 },
+                    bestPractices: { score: 10.0, issues: [], weight: 0.05 }
                 };
 
-                // Apply Microsoft standard rules
-                Object.entries(this.microsoftStandards).forEach(([category, rules]) => {
-                    rules.forEach(rule => {
-                        this.evaluateRule(rule, query, issues, categories[category], category);
-                    });
+                // Validation checks first
+                let queryValid = true;
+                this.analysisRules.validation.forEach(rule => {
+                    const validationResult = rule.test(query);
+                    if (validationResult) {
+                        queryValid = false;
+                        const issue = {
+                            category: 'validation',
+                            severity: rule.severity,
+                            title: rule.title,
+                            description: validationResult,
+                            fix: 'Use valid Microsoft tables and proper KQL syntax',
+                            impact: 'Query will fail to execute',
+                            scoreImpact: rule.scoreImpact,
+                            line: 1
+                        };
+                        issues.push(issue);
+                        categories.validation.issues.push(issue);
+                        categories.validation.score = Math.max(categories.validation.score + rule.scoreImpact, 0);
+                    }
                 });
 
+                // Apply other rules only if query is basically valid
+                if (queryValid) {
+                    Object.entries(this.analysisRules).forEach(([category, rules]) => {
+                        if (category === 'validation') return;
+                        
+                        rules.forEach(rule => {
+                            this.evaluateRule(rule, query, issues, categories[category], category);
+                        });
+                    });
+                }
+
                 // Calculate weighted score
-                const weights = { syntax: 0.2, performance: 0.4, logic: 0.2, bestPractices: 0.15, security: 0.25 };
                 overallScore = Object.entries(categories).reduce((score, [category, data]) => {
-                    return score + (data.score * weights[category]);
+                    return score + (Math.max(data.score, 0) * data.weight);
                 }, 0);
 
-                // Additional analysis
+                // Generate AI recommendations
+                const aiRecommendations = this.generateAIRecommendations(query, issues, overallScore);
+                const queryExplanation = this.generateQueryExplanation(query);
+                
                 const metrics = this.calculateQueryMetrics(query);
-                const recommendations = this.generateRecommendations(query, issues);
-                const compliance = this.checkMicrosoftCompliance(query, issues);
+                const compliance = this.checkCompliance(query, issues);
 
                 return {
-                    overallScore: Math.max(Math.round(overallScore), 0),
+                    overallScore: Math.max(Math.round(overallScore * 10) / 10, 0),
                     grade: this.calculateGrade(overallScore),
                     categories,
                     issues: issues.sort((a, b) => this.getSeverityWeight(b.severity) - this.getSeverityWeight(a.severity)),
                     metrics,
-                    recommendations,
-                    compliance
+                    compliance,
+                    aiRecommendations,
+                    queryExplanation,
+                    valid: queryValid
                 };
             }
 
@@ -904,11 +1006,11 @@ SecurityEvent
                         category: category,
                         severity: rule.severity,
                         title: rule.title,
-                        description: rule.description,
-                        fix: rule.fix,
-                        impact: rule.impact,
+                        description: rule.description || 'Issue detected in query',
+                        fix: rule.fix || 'Review and correct the identified issue',
+                        impact: rule.impact || 'May affect query performance or reliability',
                         scoreImpact: rule.scoreImpact || 0,
-                        line: rule.line || this.findQueryLine(query, matches[0])
+                        line: this.findQueryLine(query, matches[0])
                     };
 
                     allIssues.push(issue);
@@ -917,16 +1019,131 @@ SecurityEvent
                 }
             }
 
-            findQueryLine(query, searchStr) {
-                if (!searchStr || typeof searchStr !== 'string') return 1;
+            generateAIRecommendations(query, issues, score) {
+                const recommendations = [];
                 
-                const lines = query.split('\n');
-                for (let i = 0; i < lines.length; i++) {
-                    if (lines[i].includes(searchStr.substring(0, 20))) {
-                        return i + 1;
-                    }
+                // Critical issues first
+                const criticalIssues = issues.filter(i => i.severity === 'critical');
+                if (criticalIssues.length > 0) {
+                    recommendations.push({
+                        priority: 'CRITICAL',
+                        title: 'Immediate Action Required',
+                        content: `Your query has ${criticalIssues.length} critical issue(s) that will prevent execution. Address these immediately: ${criticalIssues.map(i => i.title).join(', ')}.`,
+                        action: 'Fix validation and syntax errors before proceeding'
+                    });
                 }
-                return 1;
+
+                // Performance optimization
+                if (!query.match(/TimeGenerated.*ago/gi)) {
+                    recommendations.push({
+                        priority: 'HIGH',
+                        title: 'Performance Optimization',
+                        content: 'Adding time boundaries is the single most important optimization for KQL queries. Without time filtering, your query will scan potentially millions of historical records.',
+                        action: 'Add: | where TimeGenerated > ago(7d) as your first operation'
+                    });
+                }
+
+                // Query-specific recommendations
+                const tables = this.extractTableNames(query);
+                if (tables.includes('SecurityEvent')) {
+                    recommendations.push({
+                        priority: 'MEDIUM',
+                        title: 'SecurityEvent Optimization',
+                        content: 'SecurityEvent is a high-volume table. Always filter by EventID early for optimal performance. Common EventIDs: 4624 (successful logon), 4625 (failed logon), 4688 (process creation).',
+                        action: 'Add EventID filter after TimeGenerated filter'
+                    });
+                }
+
+                if (query.match(/\|\s*project\s+\*/gi)) {
+                    recommendations.push({
+                        priority: 'MEDIUM',
+                        title: 'Column Selection Optimization',
+                        content: 'Selecting all columns (*) significantly increases data transfer costs and query execution time. Specify only the columns you need for analysis.',
+                        action: 'Replace "project *" with specific column names'
+                    });
+                }
+
+                // Best practices recommendations
+                if (!query.includes('//') && query.length > 100) {
+                    recommendations.push({
+                        priority: 'LOW',
+                        title: 'Documentation Best Practice',
+                        content: 'Adding comments to complex queries improves maintainability and helps team members understand your analytical methodology.',
+                        action: 'Add comments explaining query purpose and methodology'
+                    });
+                }
+
+                // Score-based recommendations
+                if (score >= 9.0) {
+                    recommendations.push({
+                        priority: 'EXCELLENT',
+                        title: 'Query Excellence',
+                        content: 'Outstanding query! Your KQL follows enterprise best practices and is optimized for performance. Consider sharing this as a template for your team.',
+                        action: 'No action needed - excellent work!'
+                    });
+                } else if (score >= 7.0) {
+                    recommendations.push({
+                        priority: 'GOOD',
+                        title: 'Good Query Structure',
+                        content: 'Your query is well-structured with minor optimization opportunities. Focus on the identified improvements for production readiness.',
+                        action: 'Address minor issues for optimal performance'
+                    });
+                } else if (score < 5.0) {
+                    recommendations.push({
+                        priority: 'NEEDS_WORK',
+                        title: 'Significant Improvements Needed',
+                        content: 'This query requires substantial improvements before production use. Focus on critical and major issues first, then optimize for performance.',
+                        action: 'Redesign query following identified recommendations'
+                    });
+                }
+
+                return recommendations;
+            }
+
+            generateQueryExplanation(query) {
+                const explanations = [];
+                
+                // Analyze query structure
+                const lines = query.split('\n').filter(line => line.trim() && !line.trim().startsWith('//'));
+                
+                lines.forEach((line, index) => {
+                    const trimmed = line.trim();
+                    
+                    if (index === 0 && !trimmed.startsWith('let')) {
+                        const tableName = trimmed.split('|')[0].trim();
+                        explanations.push(`📊 Starting analysis from the ${tableName} table`);
+                    }
+                    
+                    if (trimmed.includes('| where TimeGenerated')) {
+                        explanations.push(`⏰ Filtering data to recent time period for performance`);
+                    }
+                    
+                    if (trimmed.includes('| where') && !trimmed.includes('TimeGenerated')) {
+                        explanations.push(`🔍 Applying business logic filters to narrow data scope`);
+                    }
+                    
+                    if (trimmed.includes('| project')) {
+                        explanations.push(`📋 Selecting specific columns for analysis output`);
+                    }
+                    
+                    if (trimmed.includes('| summarize')) {
+                        explanations.push(`📈 Performing data aggregation and statistical analysis`);
+                    }
+                    
+                    if (trimmed.includes('| order') || trimmed.includes('| sort')) {
+                        explanations.push(`🔢 Sorting results for presentation`);
+                    }
+                    
+                    if (trimmed.includes('| join')) {
+                        explanations.push(`🔗 Combining data from multiple sources`);
+                    }
+                });
+
+                if (explanations.length === 0) {
+                    explanations.push(`🤔 Query structure needs improvement for clear analytical flow`);
+                }
+
+                return explanations;
             }
 
             calculateQueryMetrics(query) {
@@ -940,7 +1157,7 @@ SecurityEvent
                     operators: operators,
                     tables: tables.length,
                     functions: functions.length,
-                    complexity: this.calculateComplexity(query),
+                    complexity: Math.min(this.calculateComplexity(query), 10),
                     estimatedCost: this.estimateQueryCost(query)
                 };
             }
@@ -962,11 +1179,11 @@ SecurityEvent
             calculateComplexity(query) {
                 let complexity = 1;
                 const complexPatterns = [
-                    { pattern: /join/gi, weight: 3 },
-                    { pattern: /union/gi, weight: 2 },
-                    { pattern: /summarize/gi, weight: 2 },
-                    { pattern: /mv-expand|mv-apply/gi, weight: 3 },
-                    { pattern: /let\s+\w+\s*=/gi, weight: 1 }
+                    { pattern: /join/gi, weight: 2 },
+                    { pattern: /union/gi, weight: 1.5 },
+                    { pattern: /summarize/gi, weight: 1.5 },
+                    { pattern: /mv-expand|mv-apply/gi, weight: 2 },
+                    { pattern: /let\s+\w+\s*=/gi, weight: 0.5 }
                 ];
 
                 complexPatterns.forEach(({ pattern, weight }) => {
@@ -974,50 +1191,21 @@ SecurityEvent
                     complexity += matches.length * weight;
                 });
 
-                return Math.min(complexity, 20);
+                return complexity;
             }
 
             estimateQueryCost(query) {
                 let cost = 1;
                 
-                if (!query.match(/TimeGenerated.*ago/gi)) cost *= 25;
+                if (!query.match(/TimeGenerated.*ago/gi)) cost *= 15;
                 if (query.match(/\|\s*project\s+\*/gi)) cost *= 2;
-                if (query.match(/join/gi)) cost *= 5;
-                if (query.match(/union/gi)) cost *= 3;
+                if (query.match(/join/gi)) cost *= 3;
+                if (query.match(/union/gi)) cost *= 2;
                 
-                return Math.min(cost, 100);
+                return Math.min(cost, 50);
             }
 
-            generateRecommendations(query, issues) {
-                const recommendations = [];
-                
-                const criticalIssues = issues.filter(i => i.severity === 'critical').length;
-                const majorIssues = issues.filter(i => i.severity === 'major').length;
-                
-                if (criticalIssues > 0) {
-                    recommendations.push('🚨 Address critical issues immediately - query may not execute properly');
-                }
-                
-                if (majorIssues > 0) {
-                    recommendations.push('⚠️ Resolve major performance issues for production readiness');
-                }
-                
-                if (!query.match(/TimeGenerated.*ago/gi)) {
-                    recommendations.push('⏰ Add time filtering as the first priority - this is essential for any production query');
-                }
-                
-                if (!query.includes('//') && query.length > 100) {
-                    recommendations.push('📝 Add documentation comments for maintainability');
-                }
-
-                if (recommendations.length === 0) {
-                    recommendations.push('✅ Query follows Microsoft best practices well');
-                }
-
-                return recommendations;
-            }
-
-            checkMicrosoftCompliance(query, issues) {
+            checkCompliance(query, issues) {
                 const compliance = {
                     syntax: true,
                     performance: true,
@@ -1028,6 +1216,7 @@ SecurityEvent
                 issues.forEach(issue => {
                     if (issue.severity === 'critical' || issue.severity === 'major') {
                         switch (issue.category) {
+                            case 'validation':
                             case 'syntax':
                                 compliance.syntax = false;
                                 break;
@@ -1041,7 +1230,7 @@ SecurityEvent
                     }
                 });
 
-                if (!query.includes('//') && query.length > 100) {
+                if (!query.includes('//') && query.length > 150) {
                     compliance.documentation = false;
                 }
 
@@ -1049,16 +1238,28 @@ SecurityEvent
             }
 
             calculateGrade(score) {
-                if (score >= 90) return 'A';
-                if (score >= 80) return 'B';
-                if (score >= 70) return 'C';
-                if (score >= 60) return 'D';
-                return 'F';
+                if (score >= 9.0) return 'Excellent';
+                if (score >= 7.5) return 'Good';
+                if (score >= 6.0) return 'Fair';
+                if (score >= 4.0) return 'Poor';
+                return 'Fail';
             }
 
             getSeverityWeight(severity) {
                 const weights = { 'critical': 10, 'major': 8, 'minor': 6, 'suggestion': 4, 'good': 2 };
                 return weights[severity] || 0;
+            }
+
+            findQueryLine(query, searchStr) {
+                if (!searchStr || typeof searchStr !== 'string') return 1;
+                
+                const lines = query.split('\n');
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].includes(searchStr.substring(0, 20))) {
+                        return i + 1;
+                    }
+                }
+                return 1;
             }
 
             displayResults(analysis) {
@@ -1071,20 +1272,23 @@ SecurityEvent
                 // Score display
                 this.addScoreDisplay(resultsContent, analysis);
 
+                // AI Recommendations (prominently displayed)
+                this.addAIRecommendations(resultsContent, analysis.aiRecommendations);
+
+                // Query Explanation
+                this.addQueryExplanation(resultsContent, analysis.queryExplanation);
+
                 // Metrics
                 this.addMetricsDisplay(resultsContent, analysis.metrics);
 
-                // Categories
+                // Categories with issues
                 Object.entries(analysis.categories).forEach(([category, data]) => {
-                    this.addCategorySection(resultsContent, category, data);
+                    if (data.issues.length > 0) {
+                        this.addCategorySection(resultsContent, category, data);
+                    }
                 });
 
-                // Recommendations
-                if (analysis.recommendations.length > 0) {
-                    this.addRecommendationsSection(resultsContent, analysis.recommendations);
-                }
-
-                // Compliance
+                // Compliance summary
                 this.addComplianceSection(resultsContent, analysis.compliance);
             }
 
@@ -1093,12 +1297,54 @@ SecurityEvent
                 scoreDiv.className = 'score-display';
                 
                 scoreDiv.innerHTML = `
-                    <div class="score-number" style="color: ${this.getScoreColor(analysis.overallScore)}">${analysis.overallScore}</div>
-                    <div style="color: var(--text-secondary);">Overall Score</div>
-                    <div class="score-grade grade-${analysis.grade.toLowerCase()}">${analysis.grade} Grade</div>
+                    <div class="score-number" style="color: ${this.getScoreColor(analysis.overallScore)}">${analysis.overallScore}/10</div>
+                    <div class="score-grade grade-${analysis.grade.toLowerCase()}">${analysis.grade}</div>
+                    <div class="score-details">MXDR365 Enterprise Quality Score</div>
                 `;
                 
                 container.appendChild(scoreDiv);
+            }
+
+            addAIRecommendations(container, recommendations) {
+                const aiDiv = document.createElement('div');
+                aiDiv.className = 'ai-recommendations';
+                
+                aiDiv.innerHTML = `
+                    <div class="ai-title">🤖 MXDR365 AI Analysis & Recommendations</div>
+                    <div class="ai-content">
+                        ${recommendations.map(rec => `
+                            <div style="margin-bottom: 16px; padding: 12px; background: rgba(255,255,255,0.7); border-radius: 4px; border-left: 3px solid ${this.getPriorityColor(rec.priority)};">
+                                <div style="font-weight: 600; color: ${this.getPriorityColor(rec.priority)}; margin-bottom: 6px;">
+                                    ${rec.priority}: ${rec.title}
+                                </div>
+                                <div style="margin-bottom: 8px;">${rec.content}</div>
+                                <div style="font-style: italic; color: var(--text-secondary);">💡 ${rec.action}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(aiDiv);
+            }
+
+            addQueryExplanation(container, explanations) {
+                const explanationDiv = document.createElement('div');
+                explanationDiv.className = 'analysis-section';
+                
+                explanationDiv.innerHTML = `
+                    <div class="analysis-header">
+                        <div class="analysis-title">🧠 Query Analysis & Flow Explanation</div>
+                    </div>
+                    <div class="analysis-content">
+                        ${explanations.map(explanation => `
+                            <div style="margin-bottom: 8px; padding: 8px 0; border-left: 2px solid var(--mxdr-accent); padding-left: 12px;">
+                                ${explanation}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(explanationDiv);
             }
 
             addMetricsDisplay(container, metrics) {
@@ -1106,7 +1352,7 @@ SecurityEvent
                 metricsDiv.innerHTML = `
                     <div class="analysis-section">
                         <div class="analysis-header">
-                            <div class="analysis-title">📊 Query Metrics</div>
+                            <div class="analysis-title">📊 Query Complexity Metrics</div>
                         </div>
                         <div class="analysis-content">
                             <div class="metrics-grid">
@@ -1121,6 +1367,10 @@ SecurityEvent
                                 <div class="metric-card">
                                     <div class="metric-value">${metrics.tables}</div>
                                     <div class="metric-label">Tables</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">${metrics.functions}</div>
+                                    <div class="metric-label">Functions</div>
                                 </div>
                                 <div class="metric-card">
                                     <div class="metric-value">${metrics.complexity}</div>
@@ -1142,11 +1392,11 @@ SecurityEvent
                 section.className = 'analysis-section';
                 
                 const categoryTitles = {
+                    validation: '🚨 Query Validation',
                     syntax: '📝 Syntax & Structure',
-                    performance: '⚡ Performance',
-                    logic: '🧠 Logic & Semantics',
-                    bestPractices: '✨ Best Practices',
-                    security: '🛡️ Security'
+                    performance: '⚡ Performance Analysis',
+                    security: '🛡️ Security Assessment',
+                    bestPractices: '✨ Best Practices'
                 };
 
                 const scoreClass = this.getCategoryScoreClass(data.score);
@@ -1154,43 +1404,10 @@ SecurityEvent
                 section.innerHTML = `
                     <div class="analysis-header">
                         <div class="analysis-title">${categoryTitles[category]}</div>
-                        <div class="analysis-score ${scoreClass}">${Math.round(data.score)}/100</div>
+                        <div class="analysis-score ${scoreClass}">${Math.round(data.score * 10) / 10}/10</div>
                     </div>
                     <div class="analysis-content">
-                        <div class="issue-list" id="${category}-issues"></div>
-                    </div>
-                `;
-
-                const issuesList = section.querySelector('.issue-list');
-                
-                if (data.issues.length === 0) {
-                    issuesList.innerHTML = '<div style="color: var(--ms-success); text-align: center; padding: 16px;">✅ No issues found in this category</div>';
-                } else {
-                    data.issues.forEach(issue => {
-                        const issueElement = this.createIssueElement(issue);
-                        issuesList.appendChild(issueElement);
-                    });
-                }
-
-                container.appendChild(section);
-            }
-
-            addRecommendationsSection(container, recommendations) {
-                const section = document.createElement('div');
-                section.className = 'analysis-section';
-                
-                section.innerHTML = `
-                    <div class="analysis-header">
-                        <div class="analysis-title">💡 Recommendations</div>
-                    </div>
-                    <div class="analysis-content">
-                        <div class="issue-list">
-                            ${recommendations.map(rec => `
-                                <div class="issue-item issue-suggestion">
-                                    <div class="issue-title">${rec}</div>
-                                </div>
-                            `).join('')}
-                        </div>
+                        ${data.issues.map(issue => this.createIssueHTML(issue)).join('')}
                     </div>
                 `;
                 
@@ -1210,16 +1427,16 @@ SecurityEvent
                 
                 section.innerHTML = `
                     <div class="analysis-header">
-                        <div class="analysis-title">🏆 Microsoft Standards Compliance</div>
+                        <div class="analysis-title">🏆 MXDR365 Enterprise Compliance</div>
                     </div>
                     <div class="analysis-content">
                         <div class="metrics-grid">
                             ${complianceItems.map(item => `
-                                <div class="metric-card" style="background: ${compliance[item.key] ? 'var(--bg-secondary)' : 'rgba(212, 52, 56, 0.1)'}; border-color: ${compliance[item.key] ? 'var(--border-light)' : 'var(--ms-error)'};">
-                                    <div class="metric-value" style="color: ${compliance[item.key] ? 'var(--ms-success)' : 'var(--ms-error)'}">${item.icon}</div>
-                                    <div class="metric-label" style="color: ${compliance[item.key] ? 'var(--text-secondary)' : 'var(--ms-error)'};">${item.label}</div>
-                                    <div style="font-size: 0.8rem; color: ${compliance[item.key] ? 'var(--ms-success)' : 'var(--ms-error)'}; font-weight: 600; margin-top: 4px;">
-                                        ${compliance[item.key] ? 'COMPLIANT' : 'NEEDS WORK'}
+                                <div class="metric-card" style="border: 1px solid ${compliance[item.key] ? 'var(--mxdr-success)' : 'var(--mxdr-error)'};">
+                                    <div class="metric-value" style="color: ${compliance[item.key] ? 'var(--mxdr-success)' : 'var(--mxdr-error)'}">${item.icon}</div>
+                                    <div class="metric-label">${item.label}</div>
+                                    <div style="font-size: 0.7rem; color: ${compliance[item.key] ? 'var(--mxdr-success)' : 'var(--mxdr-error)'}; font-weight: 600;">
+                                        ${compliance[item.key] ? '✅ PASS' : '❌ FAIL'}
                                     </div>
                                 </div>
                             `).join('')}
@@ -1230,10 +1447,7 @@ SecurityEvent
                 container.appendChild(section);
             }
 
-            createIssueElement(issue) {
-                const div = document.createElement('div');
-                div.className = `issue-item issue-${issue.severity}`;
-                
+            createIssueHTML(issue) {
                 const severityEmojis = {
                     'critical': '🚨',
                     'major': '⚠️',
@@ -1242,34 +1456,47 @@ SecurityEvent
                     'good': '✅'
                 };
 
-                div.innerHTML = `
-                    <div class="issue-header">
-                        <div class="issue-title">${severityEmojis[issue.severity]} ${issue.title}</div>
-                        <div class="issue-severity severity-${issue.severity}">${issue.severity}</div>
-                    </div>
-                    <div class="issue-description">${issue.description}</div>
-                    <div class="issue-fix">
-                        <strong>Fix:</strong> ${issue.fix}
-                        ${issue.line ? `<br><small>📍 Line ${issue.line}</small>` : ''}
-                        ${issue.impact ? `<br><small>💡 Impact: ${issue.impact}</small>` : ''}
+                return `
+                    <div class="issue-item issue-${issue.severity}">
+                        <div class="issue-header">
+                            <div class="issue-title">${severityEmojis[issue.severity]} ${issue.title}</div>
+                            <div class="issue-severity severity-${issue.severity}">${issue.severity}</div>
+                        </div>
+                        <div class="issue-description">${issue.description}</div>
+                        <div class="issue-fix">
+                            <strong>Fix:</strong> ${issue.fix}
+                            ${issue.line ? `<br><small>📍 Line ${issue.line}</small>` : ''}
+                            ${issue.impact ? `<br><small>💡 Impact: ${issue.impact}</small>` : ''}
+                        </div>
                     </div>
                 `;
-
-                return div;
             }
 
             getScoreColor(score) {
-                if (score >= 90) return 'var(--ms-success)';
-                if (score >= 80) return 'var(--ms-blue)';
-                if (score >= 70) return 'var(--ms-warning)';
-                return 'var(--ms-error)';
+                if (score >= 9.0) return 'var(--mxdr-success)';
+                if (score >= 7.5) return 'var(--mxdr-primary)';
+                if (score >= 6.0) return 'var(--mxdr-warning)';
+                return 'var(--mxdr-error)';
             }
 
             getCategoryScoreClass(score) {
-                if (score >= 90) return 'score-excellent';
-                if (score >= 75) return 'score-good';
-                if (score >= 60) return 'score-fair';
+                if (score >= 8.5) return 'score-excellent';
+                if (score >= 7.0) return 'score-good';
+                if (score >= 5.5) return 'score-fair';
                 return 'score-poor';
+            }
+
+            getPriorityColor(priority) {
+                const colors = {
+                    'CRITICAL': 'var(--mxdr-critical)',
+                    'HIGH': 'var(--mxdr-error)',
+                    'MEDIUM': 'var(--mxdr-warning)',
+                    'LOW': 'var(--mxdr-primary)',
+                    'EXCELLENT': 'var(--mxdr-success)',
+                    'GOOD': 'var(--mxdr-primary)',
+                    'NEEDS_WORK': 'var(--mxdr-error)'
+                };
+                return colors[priority] || 'var(--mxdr-primary)';
             }
 
             toggleChat() {
@@ -1285,7 +1512,7 @@ SecurityEvent
                 }
             }
 
-            sendChatMessage(message) {
+            async sendChatMessage(message) {
                 const chatBody = document.getElementById('chatBody');
                 
                 // Add user message
@@ -1293,37 +1520,271 @@ SecurityEvent
                 userMsg.className = 'chat-message chat-user';
                 userMsg.textContent = message;
                 chatBody.appendChild(userMsg);
+                
+                chatBody.scrollTop = chatBody.scrollHeight;
 
-                // Generate AI response
-                setTimeout(() => {
-                    const aiMsg = document.createElement('div');
-                    aiMsg.className = 'chat-message chat-ai';
-                    aiMsg.textContent = this.generateAIResponse(message);
-                    chatBody.appendChild(aiMsg);
-                    chatBody.scrollTop = chatBody.scrollHeight;
-                }, 500);
+                // Show thinking
+                const thinkingMsg = document.createElement('div');
+                thinkingMsg.className = 'chat-message chat-ai';
+                thinkingMsg.innerHTML = '<em>🤔 MXDR365 AI analyzing...</em>';
+                thinkingMsg.id = 'thinking-msg';
+                chatBody.appendChild(thinkingMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
 
+                // Wait and generate response
+                await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
+                
+                // Remove thinking message
+                const thinking = document.getElementById('thinking-msg');
+                if (thinking) thinking.remove();
+
+                // Generate intelligent response
+                const response = await this.generateIntelligentAIResponse(message);
+                
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'chat-message chat-ai';
+                aiMsg.innerHTML = response;
+                chatBody.appendChild(aiMsg);
                 chatBody.scrollTop = chatBody.scrollHeight;
             }
 
-            generateAIResponse(message) {
-                const responses = {
-                    'time filter': 'Always add time filters like "| where TimeGenerated > ago(7d)" as your first operation. This is critical for performance in any production environment.',
-                    'performance': 'Key performance tips: 1) Filter early with where clauses, 2) Use specific columns with project, 3) Avoid wildcards, 4) Use top instead of order by + take.',
-                    'syntax': 'Common KQL syntax: Use lowercase operators (where, not WHERE), avoid trailing semicolons, and ensure proper pipe operator spacing.',
-                    'security': 'Security best practices: Avoid projecting sensitive data, use proper authentication event IDs, and ensure queries respect data classification boundaries.',
-                    'join': 'For joins: Specify join kind explicitly, use proper key matching, and filter both tables before joining for better performance.',
-                    'summarize': 'Summarize tips: Group by low-cardinality fields first, use specific aggregation functions, and consider using bin() for time-based grouping.',
-                    'optimize': 'Query optimization: 1) Time filters first, 2) Equality filters before contains, 3) Project only needed columns, 4) Use indexed columns when possible.'
-                };
-
-                for (const [key, response] of Object.entries(responses)) {
-                    if (message.toLowerCase().includes(key)) {
+            async generateIntelligentAIResponse(message) {
+                const currentQuery = document.getElementById('queryEditor').value.trim();
+                const messageLower = message.toLowerCase();
+                
+                // Context-aware AI responses based on query analysis
+                if (messageLower.includes('optimize') || messageLower.includes('performance')) {
+                    if (currentQuery) {
+                        const hasTimeFilter = currentQuery.match(/TimeGenerated.*ago\(/gi);
+                        const hasWildcard = currentQuery.match(/\|\s*project\s+\*/gi);
+                        const tables = this.extractTableNames(currentQuery);
+                        
+                        let response = `<strong>🚀 MXDR365 Performance Analysis:</strong><br><br>`;
+                        
+                        if (!hasTimeFilter) {
+                            response += `🔴 <strong>CRITICAL:</strong> Your query lacks time filtering! This will scan the entire table history.<br>`;
+                            response += `💡 <strong>Fix:</strong> Add "| where TimeGenerated > ago(7d)" as your first operation.<br><br>`;
+                        }
+                        
+                        if (hasWildcard) {
+                            response += `🟡 <strong>MAJOR:</strong> Using "project *" increases data transfer costs significantly.<br>`;
+                            response += `💡 <strong>Fix:</strong> Specify only needed columns like "| project TimeGenerated, Computer, Account"<br><br>`;
+                        }
+                        
+                        if (tables.includes('SecurityEvent')) {
+                            response += `🛡️ <strong>SecurityEvent Tip:</strong> This is a high-volume table. Always filter by EventID early:<br>`;
+                            response += `• EventID 4624 = Successful logon<br>`;
+                            response += `• EventID 4625 = Failed logon<br>`;
+                            response += `• EventID 4688 = Process creation<br><br>`;
+                        }
+                        
+                        response += `⚡ <strong>Quick Wins:</strong><br>`;
+                        response += `1. Time filter first (most important)<br>`;
+                        response += `2. Use equality (==) before contains operations<br>`;
+                        response += `3. Filter before extending or computing<br>`;
+                        response += `4. Use "top N" instead of "order by + take"`;
+                        
                         return response;
+                    } else {
+                        return `<strong>🚀 KQL Performance Best Practices:</strong><br><br>
+                        <strong>Critical Rules:</strong><br>
+                        1. <strong>Time filtering first</strong> - Always use "| where TimeGenerated > ago(Xd)"<br>
+                        2. <strong>Early filtering</strong> - Filter before any computations<br>
+                        3. <strong>Specific projections</strong> - Avoid "project *"<br>
+                        4. <strong>Index-friendly operations</strong> - Use equality before regex<br><br>
+                        <strong>Common Patterns:</strong><br>
+                        • Use "top 100 by Column" instead of "order by Column | take 100"<br>
+                        • Filter high-cardinality tables early (SecurityEvent, SigninLogs)<br>
+                        • Use "has" instead of "contains" when possible<br><br>
+                        💡 Paste your query for specific optimization advice!`;
                     }
                 }
+                
+                if (messageLower.includes('security') || messageLower.includes('event')) {
+                    return `<strong>🛡️ MXDR365 Security Analytics Guide:</strong><br><br>
+                    <strong>Key Security Tables:</strong><br>
+                    • <strong>SecurityEvent</strong> - Windows security logs<br>
+                    • <strong>SigninLogs</strong> - Azure AD authentication<br>
+                    • <strong>DeviceEvents</strong> - Endpoint security events<br>
+                    • <strong>AlertInfo</strong> - Security alerts and incidents<br><br>
+                    <strong>Critical EventIDs:</strong><br>
+                    • <strong>4624</strong> - Successful logon (monitor for privilege escalation)<br>
+                    • <strong>4625</strong> - Failed logon (detect brute force attacks)<br>
+                    • <strong>4688</strong> - Process creation (malware execution)<br>
+                    • <strong>4672</strong> - Special privileges assigned<br><br>
+                    <strong>Best Practices:</strong><br>
+                    • Always include Account and Computer fields for incident response<br>
+                    • Use LogonType to understand authentication context<br>
+                    • Correlate with DeviceEvents for comprehensive analysis<br>
+                    • Filter by WorkstationName for lateral movement detection`;
+                }
+                
+                if (messageLower.includes('syntax') || messageLower.includes('error')) {
+                    if (currentQuery) {
+                        const errors = [];
+                        if (currentQuery.match(/\|\s*\|/)) errors.push('Double pipes detected');
+                        if (currentQuery.match(/\b(WHERE|SUMMARIZE|PROJECT)\b/)) errors.push('Uppercase operators should be lowercase');
+                        if (currentQuery.match(/;$/m)) errors.push('Unnecessary semicolons');
+                        
+                        let response = `<strong>📝 MXDR365 Syntax Analysis:</strong><br><br>`;
+                        
+                        if (errors.length > 0) {
+                            response += `🔴 <strong>Issues Found:</strong><br>`;
+                            errors.forEach(error => response += `• ${error}<br>`);
+                            response += `<br>`;
+                        }
+                        
+                        response += `<strong>KQL Syntax Rules:</strong><br>`;
+                        response += `• Operators: where, summarize, project (lowercase)<br>`;
+                        response += `• Pipes: Single | between operations<br>`;
+                        response += `• Strings: Use double quotes "text"<br>`;
+                        response += `• Comments: // for single line, /* */ for multi-line<br>`;
+                        response += `• No semicolons needed at end of statements`;
+                        
+                        return response;
+                    } else {
+                        return `<strong>📝 KQL Syntax Guidelines:</strong><br><br>
+                        <strong>Basic Structure:</strong><br>
+                        TableName<br>
+                        | where condition<br>
+                        | project columns<br>
+                        | summarize aggregation<br><br>
+                        <strong>Common Mistakes:</strong><br>
+                        ❌ WHERE (use: where)<br>
+                        ❌ || (use: |)<br>
+                        ❌ ending with ; (not needed)<br>
+                        ❌ 'single quotes' (use: "double quotes")<br><br>
+                        <strong>Best Practices:</strong><br>
+                        ✅ Start with table name<br>
+                        ✅ Use lowercase operators<br>
+                        ✅ Add comments with //<br>
+                        ✅ Proper spacing around pipes`;
+                    }
+                }
+                
+                if (messageLower.includes('table') || messageLower.includes('join')) {
+                    return `<strong>🔗 MXDR365 Table Operations:</strong><br><br>
+                    <strong>Valid MXDR365 Tables:</strong><br>
+                    • SecurityEvent, SigninLogs, DeviceEvents<br>
+                    • AlertInfo, ThreatIntelligenceIndicator<br>
+                    • CommonSecurityLog, AzureActivity<br>
+                    • OfficeActivity, PowerBIAudit<br><br>
+                    <strong>Join Best Practices:</strong><br>
+                    • Always specify join kind: inner, leftouter, rightouter<br>
+                    • Filter both tables before joining<br>
+                    • Use indexed columns as join keys<br>
+                    • Example: SecurityEvent | join kind=inner (DeviceEvents) on Computer<br><br>
+                    <strong>Performance Tips:</strong><br>
+                    • Join smaller table to larger table<br>
+                    • Use TimeGenerated filters on both sides<br>
+                    • Project only needed columns before join`;
+                }
+                
+                if (messageLower.includes('help') || messageLower.includes('what can you')) {
+                    return `<strong>🤖 MXDR365 AI Assistant Capabilities:</strong><br><br>
+                    <strong>Query Analysis:</strong><br>
+                    • Comprehensive syntax validation<br>
+                    • Performance optimization recommendations<br>
+                    • Security best practices assessment<br>
+                    • Enterprise compliance scoring<br><br>
+                    <strong>Expert Guidance:</strong><br>
+                    • KQL syntax and structure help<br>
+                    • Table-specific optimization advice<br>
+                    • Security analytics methodologies<br>
+                    • Troubleshooting and debugging<br><br>
+                    <strong>Specialized Areas:</strong><br>
+                    • Threat hunting query design<br>
+                    • Detection rule optimization<br>
+                    • Incident investigation techniques<br>
+                    • Cost optimization strategies<br><br>
+                    💡 Ask me about any KQL topic or paste your query for analysis!`;
+                }
+                
+                if (messageLower.includes('threat') || messageLower.includes('hunt')) {
+                    return `<strong>🎯 MXDR365 Threat Hunting Excellence:</strong><br><br>
+                    <strong>Hunting Methodology:</strong><br>
+                    1. <strong>Hypothesis</strong> - Define what you're hunting for<br>
+                    2. <strong>Data Sources</strong> - Select relevant tables<br>
+                    3. <strong>Analytics</strong> - Build detection logic<br>
+                    4. <strong>Validation</strong> - Test with known data<br><br>
+                    <strong>Common Hunting Patterns:</strong><br>
+                    • Lateral movement: Join SecurityEvent + DeviceEvents<br>
+                    • Privilege escalation: EventID 4672 + 4624 correlation<br>
+                    • Data exfiltration: Large file transfers + external IPs<br>
+                    • Living off the land: PowerShell + cmd execution patterns<br><br>
+                    <strong>Pro Tips:</strong><br>
+                    • Use statistical analysis (percentile, stdev) for baselines<br>
+                    • Correlate multiple data sources for higher fidelity<br>
+                    • Document hunting hypotheses in query comments`;
+                }
+                
+                if (messageLower.includes('explain') && currentQuery) {
+                    const explanation = this.generateQueryExplanation(currentQuery);
+                    let response = `<strong>🧠 MXDR365 Query Explanation:</strong><br><br>`;
+                    
+                    response += `<strong>Your Query Analysis:</strong><br>`;
+                    explanation.forEach(exp => {
+                        response += `${exp}<br>`;
+                    });
+                    
+                    const tables = this.extractTableNames(currentQuery);
+                    if (tables.length > 0) {
+                        response += `<br><strong>Tables Used:</strong><br>`;
+                        tables.forEach(table => {
+                            response += `• <strong>${table}</strong> - ${this.getTableDescription(table)}<br>`;
+                        });
+                    }
+                    
+                    return response;
+                }
+                
+                // General contextual response
+                if (currentQuery) {
+                    const score = this.quickScoreQuery(currentQuery);
+                    return `<strong>🔍 Quick Query Assessment:</strong><br><br>
+                    Estimated Score: <strong>${score}/10</strong><br><br>
+                    I can help you with:<br>
+                    • Detailed performance optimization<br>
+                    • Syntax validation and fixes<br>
+                    • Security best practices<br>
+                    • Query explanation and logic review<br><br>
+                    💡 Ask me specific questions about your query or KQL concepts!`;
+                } else {
+                    return `<strong>🤖 MXDR365 AI Ready!</strong><br><br>
+                    I'm here to help with enterprise KQL analysis. You can ask me about:<br><br>
+                    • Query optimization and performance<br>
+                    • KQL syntax and troubleshooting<br>
+                    • Security analytics best practices<br>
+                    • Table operations and joins<br>
+                    • Threat hunting methodologies<br><br>
+                    📝 Paste your KQL query for comprehensive analysis, or ask any KQL question!`;
+                }
+            }
 
-                return 'I can help with KQL syntax, performance optimization, Microsoft best practices, security considerations, and query troubleshooting. What specific area would you like guidance on?';
+            getTableDescription(table) {
+                const descriptions = {
+                    'SecurityEvent': 'Windows security events and authentication logs',
+                    'SigninLogs': 'Azure AD user authentication and sign-in activities',
+                    'DeviceEvents': 'Endpoint security events and device activities',
+                    'AlertInfo': 'Security alerts and incident information',
+                    'DeviceProcessEvents': 'Process creation and execution events',
+                    'DeviceNetworkEvents': 'Network connection and traffic events',
+                    'CommonSecurityLog': 'Common Event Format (CEF) security logs',
+                    'AzureActivity': 'Azure resource management and activity logs'
+                };
+                return descriptions[table] || 'Security and operational data table';
+            }
+
+            quickScoreQuery(query) {
+                let score = 10;
+                
+                if (!query.match(/TimeGenerated.*ago/gi)) score -= 3;
+                if (query.match(/\|\s*project\s+\*/gi)) score -= 1.5;
+                if (query.match(/\|\s*\|/g)) score -= 2;
+                if (!this.extractTableNames(query).every(t => this.validTables.has(t))) score -= 3;
+                if (!query.includes('//') && query.length > 100) score -= 0.5;
+                
+                return Math.max(Math.round(score * 10) / 10, 0);
             }
 
             showAlert(message) {
@@ -1331,16 +1792,16 @@ SecurityEvent
             }
         }
 
-        // Global functions for chat
+        // Global functions for chat interface
         function toggleChat() {
-            grader.toggleChat();
+            analyzer.toggleChat();
         }
 
         function sendMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
             if (message) {
-                grader.sendChatMessage(message);
+                analyzer.sendChatMessage(message);
                 input.value = '';
             }
         }
@@ -1351,11 +1812,12 @@ SecurityEvent
             }
         }
 
-        // Initialize the grader
-        let grader;
+        // Initialize the MXDR365 analyzer
+        let analyzer;
         document.addEventListener('DOMContentLoaded', () => {
-            grader = new MicrosoftKQLGrader();
+            analyzer = new MXDR365KQLAnalyzer();
         });
     </script>
 </body>
 </html>
+                
